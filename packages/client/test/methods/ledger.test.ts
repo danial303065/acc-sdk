@@ -136,6 +136,10 @@ describe("Ledger", () => {
         expect(isUp).toEqual(true);
     });
 
+    it("Set Exchange Rate", async () => {
+        await NodeInfo.setExchangeRate(contractInfo.currencyRate, validatorWallets);
+    });
+
     it("Prepare", async () => {
         await NodeInfo.transferBOA(userWallets.map((m) => m.address));
         await NodeInfo.transferBOA(shopWallets.map((m) => m.address));
@@ -152,10 +156,6 @@ describe("Ledger", () => {
             elem.shopId = ContractUtils.getShopId(elem.wallet.address, LoyaltyNetworkID.KIOS);
         }
         await NodeInfo.addShopData(contractInfo, shopData);
-    });
-
-    it("Set Exchange Rate", async () => {
-        await NodeInfo.setExchangeRate(contractInfo.currencyRate, validatorWallets);
     });
 
     it("Save Purchase Data 1", async () => {

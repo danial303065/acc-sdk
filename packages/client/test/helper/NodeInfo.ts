@@ -153,14 +153,14 @@ export class NodeInfo {
         }
 
         if (
-            process.env.SETTLEMENTS !== undefined &&
-            process.env.SETTLEMENTS.trim() !== "" &&
-            reg_bytes64.test(process.env.SETTLEMENTS)
+            process.env.SETTLEMENT !== undefined &&
+            process.env.SETTLEMENT.trim() !== "" &&
+            reg_bytes64.test(process.env.SETTLEMENT)
         ) {
-            accounts.push(process.env.SETTLEMENTS);
+            accounts.push(process.env.SETTLEMENT);
         } else {
-            process.env.SETTLEMENTS = Wallet.createRandom().privateKey;
-            accounts.push(process.env.SETTLEMENTS);
+            process.env.SETTLEMENT = Wallet.createRandom().privateKey;
+            accounts.push(process.env.SETTLEMENT);
         }
 
         if (process.env.FEE !== undefined && process.env.FEE.trim() !== "" && reg_bytes64.test(process.env.FEE)) {
@@ -614,7 +614,7 @@ export class NodeInfo {
             const height = 0;
             const rates = [
                 {
-                    symbol: "KIOS",
+                    symbol: "KYT",
                     rate: multiple.mul(150)
                 },
                 {
@@ -630,7 +630,7 @@ export class NodeInfo {
                     rate: multiple.mul(10)
                 },
                 {
-                    symbol: "kios",
+                    symbol: "kyt",
                     rate: multiple.mul(150)
                 },
                 {
