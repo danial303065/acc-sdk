@@ -1,15 +1,15 @@
 import { ContextParams, ContextState } from "./interfaces/context";
 import { SupportedNetwork, SupportedNetworkArray } from "./interfaces/common";
-import { InvalidAddressError, UnsupportedProtocolError, UnsupportedNetworkError } from "dms-sdk-common";
+import { InvalidAddressError, UnsupportedProtocolError, UnsupportedNetworkError } from "dms-sdk-common-v2";
 import { GraphQLClient } from "graphql-request";
 import { getNetwork } from "../utils/Utilty";
-
-export { ContextParams } from "./interfaces/context";
 
 import { isAddress } from "@ethersproject/address";
 import { Network } from "@ethersproject/networks";
 import { JsonRpcProvider, Networkish } from "@ethersproject/providers";
 import { AddressZero } from "@ethersproject/constants";
+
+export { ContextParams } from "./interfaces/context";
 
 const supportedProtocols = ["https:", "http:"];
 // if (typeof process !== "undefined" && process.env?.TESTING) {

@@ -1,13 +1,4 @@
-import {
-    Amount,
-    Client,
-    Context,
-    ContractUtils,
-    LoyaltyType,
-    NormalSteps,
-    ShopAction,
-    ShopWithdrawStatus
-} from "../../src";
+import { Amount, Client, Context, ContractUtils, NormalSteps, ShopAction, ShopWithdrawStatus } from "../../src";
 import { Wallet } from "@ethersproject/wallet";
 
 // @ts-ignore
@@ -104,9 +95,6 @@ describe("Integrated test of Shop", () => {
 
                 let userIndex = 0;
                 for (const user of users) {
-                    const loyaltyType = await client.ledger.getLoyaltyType(user.address);
-                    if (loyaltyType !== LoyaltyType.TOKEN) continue;
-
                     const balance = await client.ledger.getTokenBalance(user.address);
                     if (balance.gt(totalToken)) {
                         purchase.userIndex = userIndex;

@@ -1,59 +1,109 @@
 import { NetworkDeployment, SupportedNetwork } from "./interfaces/common";
-import { activeContractsList as dmsActiveContractList } from "dms-osx-lib";
-import { activeContractsList as delActiveContractList } from "del-osx-lib";
+import { activeContractsList } from "dms-contracts-lib-v2";
 import { Network } from "@ethersproject/networks";
 
 export const LIVE_CONTRACTS: { [K in SupportedNetwork]: NetworkDeployment } = {
     loyalty_mainnet: {
-        PhoneLinkCollectionAddress: delActiveContractList.loyalty_mainnet.PhoneLinkCollection,
-        LoyaltyTokenAddress: dmsActiveContractList.loyalty_mainnet.LoyaltyToken,
-        ValidatorAddress: dmsActiveContractList.loyalty_mainnet.Validator,
-        CurrencyRateAddress: dmsActiveContractList.loyalty_mainnet.CurrencyRate,
-        ShopAddress: dmsActiveContractList.loyalty_mainnet.Shop,
-        LedgerAddress: dmsActiveContractList.loyalty_mainnet.Ledger,
-        LoyaltyProviderAddress: dmsActiveContractList.loyalty_mainnet.LoyaltyProvider,
-        LoyaltyConsumerAddress: dmsActiveContractList.loyalty_mainnet.LoyaltyConsumer,
-        LoyaltyExchangerAddress: dmsActiveContractList.loyalty_mainnet.LoyaltyExchanger,
-        LoyaltyTransferAddress: dmsActiveContractList.loyalty_mainnet.LoyaltyTransfer,
-        LoyaltyBridgeAddress: dmsActiveContractList.loyalty_mainnet.LoyaltyBridge,
+        PhoneLinkCollectionAddress: activeContractsList.loyalty_mainnet.LoyaltyToken,
+        LoyaltyTokenAddress: activeContractsList.loyalty_mainnet.LoyaltyToken,
+        ValidatorAddress: activeContractsList.loyalty_mainnet.Validator,
+        CurrencyRateAddress: activeContractsList.loyalty_mainnet.CurrencyRate,
+        ShopAddress: activeContractsList.loyalty_mainnet.Shop,
+        LedgerAddress: activeContractsList.loyalty_mainnet.Ledger,
+        LoyaltyProviderAddress: activeContractsList.loyalty_mainnet.LoyaltyProvider,
+        LoyaltyConsumerAddress: activeContractsList.loyalty_mainnet.LoyaltyConsumer,
+        LoyaltyExchangerAddress: activeContractsList.loyalty_mainnet.LoyaltyExchanger,
+        LoyaltyTransferAddress: activeContractsList.loyalty_mainnet.LoyaltyTransfer,
+        LoyaltyBridgeAddress: activeContractsList.loyalty_mainnet.LoyaltyBridge,
         network: 215110,
         web3Endpoint: "https://rpc.kios.bosagora.org/",
         relayEndpoint: "https://relay.kios.bosagora.org/",
         graphqlEndpoint: "https://graph.kios.bosagora.org/subgraphs/name/bosagora/dms-osx-sidemainnet"
     },
     loyalty_testnet: {
-        PhoneLinkCollectionAddress: delActiveContractList.loyalty_testnet.PhoneLinkCollection,
-        LoyaltyTokenAddress: dmsActiveContractList.loyalty_testnet.LoyaltyToken,
-        ValidatorAddress: dmsActiveContractList.loyalty_testnet.Validator,
-        CurrencyRateAddress: dmsActiveContractList.loyalty_testnet.CurrencyRate,
-        ShopAddress: dmsActiveContractList.loyalty_testnet.Shop,
-        LedgerAddress: dmsActiveContractList.loyalty_testnet.Ledger,
-        LoyaltyProviderAddress: dmsActiveContractList.loyalty_testnet.LoyaltyProvider,
-        LoyaltyConsumerAddress: dmsActiveContractList.loyalty_testnet.LoyaltyConsumer,
-        LoyaltyExchangerAddress: dmsActiveContractList.loyalty_testnet.LoyaltyExchanger,
-        LoyaltyTransferAddress: dmsActiveContractList.loyalty_testnet.LoyaltyTransfer,
-        LoyaltyBridgeAddress: dmsActiveContractList.loyalty_testnet.LoyaltyBridge,
+        PhoneLinkCollectionAddress: activeContractsList.loyalty_testnet.LoyaltyToken,
+        LoyaltyTokenAddress: activeContractsList.loyalty_testnet.LoyaltyToken,
+        ValidatorAddress: activeContractsList.loyalty_testnet.Validator,
+        CurrencyRateAddress: activeContractsList.loyalty_testnet.CurrencyRate,
+        ShopAddress: activeContractsList.loyalty_testnet.Shop,
+        LedgerAddress: activeContractsList.loyalty_testnet.Ledger,
+        LoyaltyProviderAddress: activeContractsList.loyalty_testnet.LoyaltyProvider,
+        LoyaltyConsumerAddress: activeContractsList.loyalty_testnet.LoyaltyConsumer,
+        LoyaltyExchangerAddress: activeContractsList.loyalty_testnet.LoyaltyExchanger,
+        LoyaltyTransferAddress: activeContractsList.loyalty_testnet.LoyaltyTransfer,
+        LoyaltyBridgeAddress: activeContractsList.loyalty_testnet.LoyaltyBridge,
         network: 215115,
         web3Endpoint: "https://rpc.test.kios.bosagora.org/",
         relayEndpoint: "https://relay.test.kios.bosagora.org/",
         graphqlEndpoint: "https://graph.test.kios.bosagora.org/subgraphs/name/bosagora/dms-osx-sidetestnet"
     },
     loyalty_devnet: {
-        PhoneLinkCollectionAddress: delActiveContractList.loyalty_devnet.PhoneLinkCollection,
-        LoyaltyTokenAddress: dmsActiveContractList.loyalty_devnet.LoyaltyToken,
-        ValidatorAddress: dmsActiveContractList.loyalty_devnet.Validator,
-        CurrencyRateAddress: dmsActiveContractList.loyalty_devnet.CurrencyRate,
-        ShopAddress: dmsActiveContractList.loyalty_devnet.Shop,
-        LedgerAddress: dmsActiveContractList.loyalty_devnet.Ledger,
-        LoyaltyProviderAddress: dmsActiveContractList.loyalty_devnet.LoyaltyProvider,
-        LoyaltyConsumerAddress: dmsActiveContractList.loyalty_devnet.LoyaltyConsumer,
-        LoyaltyExchangerAddress: dmsActiveContractList.loyalty_devnet.LoyaltyExchanger,
-        LoyaltyTransferAddress: dmsActiveContractList.loyalty_devnet.LoyaltyTransfer,
-        LoyaltyBridgeAddress: dmsActiveContractList.loyalty_devnet.LoyaltyBridge,
+        PhoneLinkCollectionAddress: activeContractsList.loyalty_devnet.PhoneLinkCollection,
+        LoyaltyTokenAddress: activeContractsList.loyalty_devnet.LoyaltyToken,
+        ValidatorAddress: activeContractsList.loyalty_devnet.Validator,
+        CurrencyRateAddress: activeContractsList.loyalty_devnet.CurrencyRate,
+        ShopAddress: activeContractsList.loyalty_devnet.Shop,
+        LedgerAddress: activeContractsList.loyalty_devnet.Ledger,
+        LoyaltyProviderAddress: activeContractsList.loyalty_devnet.LoyaltyProvider,
+        LoyaltyConsumerAddress: activeContractsList.loyalty_devnet.LoyaltyConsumer,
+        LoyaltyExchangerAddress: activeContractsList.loyalty_devnet.LoyaltyExchanger,
+        LoyaltyTransferAddress: activeContractsList.loyalty_devnet.LoyaltyTransfer,
+        LoyaltyBridgeAddress: activeContractsList.loyalty_devnet.LoyaltyBridge,
         network: 24680,
         web3Endpoint: "http://rpc-side.dev.lyt.bosagora.org:8545/",
         relayEndpoint: "http://relay.dev.lyt.bosagora.org:7070/",
         graphqlEndpoint: "http://subgraph.dev.lyt.bosagora.org:8000/subgraphs/name/bosagora/dms-osx-sidechain"
+    },
+    acc_mainnet: {
+        PhoneLinkCollectionAddress: activeContractsList.acc_mainnet.LoyaltyToken,
+        LoyaltyTokenAddress: activeContractsList.acc_mainnet.LoyaltyToken,
+        ValidatorAddress: activeContractsList.acc_mainnet.Validator,
+        CurrencyRateAddress: activeContractsList.acc_mainnet.CurrencyRate,
+        ShopAddress: activeContractsList.acc_mainnet.Shop,
+        LedgerAddress: activeContractsList.acc_mainnet.Ledger,
+        LoyaltyProviderAddress: activeContractsList.acc_mainnet.LoyaltyProvider,
+        LoyaltyConsumerAddress: activeContractsList.acc_mainnet.LoyaltyConsumer,
+        LoyaltyExchangerAddress: activeContractsList.acc_mainnet.LoyaltyExchanger,
+        LoyaltyTransferAddress: activeContractsList.acc_mainnet.LoyaltyTransfer,
+        LoyaltyBridgeAddress: activeContractsList.acc_mainnet.LoyaltyBridge,
+        network: 215110,
+        web3Endpoint: "https://rpc.acc.bosagora.org/",
+        relayEndpoint: "https://relay.acc.bosagora.org/",
+        graphqlEndpoint: "https://graph.acc.bosagora.org/subgraphs/name/bosagora/dms-osx-sidemainnet"
+    },
+    acc_testnet: {
+        PhoneLinkCollectionAddress: activeContractsList.acc_testnet.LoyaltyToken,
+        LoyaltyTokenAddress: activeContractsList.acc_testnet.LoyaltyToken,
+        ValidatorAddress: activeContractsList.acc_testnet.Validator,
+        CurrencyRateAddress: activeContractsList.acc_testnet.CurrencyRate,
+        ShopAddress: activeContractsList.acc_testnet.Shop,
+        LedgerAddress: activeContractsList.acc_testnet.Ledger,
+        LoyaltyProviderAddress: activeContractsList.acc_testnet.LoyaltyProvider,
+        LoyaltyConsumerAddress: activeContractsList.acc_testnet.LoyaltyConsumer,
+        LoyaltyExchangerAddress: activeContractsList.acc_testnet.LoyaltyExchanger,
+        LoyaltyTransferAddress: activeContractsList.acc_testnet.LoyaltyTransfer,
+        LoyaltyBridgeAddress: activeContractsList.acc_testnet.LoyaltyBridge,
+        network: 215115,
+        web3Endpoint: "https://rpc.test.acc.bosagora.org/",
+        relayEndpoint: "https://relay.test.acc.bosagora.org/",
+        graphqlEndpoint: "https://graph.test.acc.bosagora.org/subgraphs/name/bosagora/dms-osx-sidetestnet"
+    },
+    acc_devnet: {
+        PhoneLinkCollectionAddress: activeContractsList.acc_devnet.PhoneLinkCollection,
+        LoyaltyTokenAddress: activeContractsList.acc_devnet.LoyaltyToken,
+        ValidatorAddress: activeContractsList.acc_devnet.Validator,
+        CurrencyRateAddress: activeContractsList.acc_devnet.CurrencyRate,
+        ShopAddress: activeContractsList.acc_devnet.Shop,
+        LedgerAddress: activeContractsList.acc_devnet.Ledger,
+        LoyaltyProviderAddress: activeContractsList.acc_devnet.LoyaltyProvider,
+        LoyaltyConsumerAddress: activeContractsList.acc_devnet.LoyaltyConsumer,
+        LoyaltyExchangerAddress: activeContractsList.acc_devnet.LoyaltyExchanger,
+        LoyaltyTransferAddress: activeContractsList.acc_devnet.LoyaltyTransfer,
+        LoyaltyBridgeAddress: activeContractsList.acc_devnet.LoyaltyBridge,
+        network: 24680,
+        web3Endpoint: "http://rpc-side.dev.acc.bosagora.org:28545/",
+        relayEndpoint: "http://relay.dev.acc.bosagora.org:27070/",
+        graphqlEndpoint: "http://subgraph.dev.acc.bosagora.org:28000/subgraphs/name/bosagora/dms-osx-sidechain"
     },
     localhost: {
         PhoneLinkCollectionAddress: "",
@@ -85,6 +135,18 @@ export const ADDITIONAL_NETWORKS: Network[] = [
     },
     {
         name: SupportedNetwork.LOYALTY_DEVNET,
+        chainId: 24680
+    },
+    {
+        name: SupportedNetwork.ACC_MAINNET,
+        chainId: 215120
+    },
+    {
+        name: SupportedNetwork.ACC_TESTNET,
+        chainId: 215125
+    },
+    {
+        name: SupportedNetwork.ACC_DEVNET,
         chainId: 24680
     }
 ];

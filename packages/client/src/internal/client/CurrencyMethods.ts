@@ -1,8 +1,8 @@
 import { ClientCore, Context, SupportedNetwork, SupportedNetworkArray } from "../../client-common";
 import { ICurrencyMethods } from "../../interface/ICurrency";
-import { CurrencyRate, CurrencyRate__factory, LoyaltyToken, LoyaltyToken__factory } from "dms-osx-lib";
+import { CurrencyRate, CurrencyRate__factory, LoyaltyToken, LoyaltyToken__factory } from "dms-contracts-lib-v2";
 import { Provider } from "@ethersproject/providers";
-import { NoProviderError, UnsupportedNetworkError } from "dms-sdk-common";
+import { NoProviderError, UnsupportedNetworkError } from "dms-sdk-common-v2";
 import { BigNumber } from "@ethersproject/bignumber";
 import { ContractUtils } from "../../utils/ContractUtils";
 import { getNetwork } from "../../utils/Utilty";

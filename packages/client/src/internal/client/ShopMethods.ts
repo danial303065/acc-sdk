@@ -6,9 +6,9 @@ import {
     SupportedNetwork,
     SupportedNetworkArray
 } from "../../client-common";
-import { Shop, Shop__factory } from "dms-osx-lib";
+import { Shop, Shop__factory } from "dms-contracts-lib-v2";
 import { Provider } from "@ethersproject/providers";
-import { NoProviderError, NoSignerError, UnsupportedNetworkError } from "dms-sdk-common";
+import { NoProviderError, NoSignerError, UnsupportedNetworkError } from "dms-sdk-common-v2";
 import { ContractUtils } from "../../utils/ContractUtils";
 import {
     AddShopStepValue,

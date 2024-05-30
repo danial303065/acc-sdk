@@ -1,4 +1,4 @@
-import { ClientNotInitializedError, GraphQLError, NoNodesAvailableError, runAndRetry } from "dms-sdk-common";
+import { ClientNotInitializedError, GraphQLError, NoNodesAvailableError, runAndRetry } from "dms-sdk-common-v2";
 import { ClientError, GraphQLClient } from "graphql-request";
 import { Context } from "../../client-common/context";
 import { QueryStatus } from "../graphql-queries";

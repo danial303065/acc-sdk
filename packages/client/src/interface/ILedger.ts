@@ -2,13 +2,12 @@ import { IClientCore, IClientHttpCore } from "../client-common";
 import {
     ApproveCancelPaymentValue,
     ApproveNewPaymentValue,
-    ChangeLoyaltyTypeStepValue,
+    ExchangePointToTokenStepValue,
     ChangeToPayablePointStepValue,
     DelegatedTransferStepValue,
     DepositStepValue,
     DepositViaBridgeStepValue,
     IChainInfo,
-    LoyaltyType,
     MobileType,
     PaymentDetailData,
     QueryOption,
@@ -56,8 +55,7 @@ export interface ILedgerMethods extends IClientCore, IClientHttpCore {
     withdraw: (amount: BigNumber) => AsyncGenerator<WithdrawStepValue>;
     updateAllowance: (params: UpdateAllowanceParams) => AsyncGenerator<UpdateAllowanceStepValue>;
 
-    changeToLoyaltyToken: () => AsyncGenerator<ChangeLoyaltyTypeStepValue>;
-    getLoyaltyType: (account: string) => Promise<LoyaltyType>;
+    exchangePointToToken: (amount: BigNumber) => AsyncGenerator<ExchangePointToTokenStepValue>;
 
     changeToPayablePoint: (phone: string) => AsyncGenerator<ChangeToPayablePointStepValue>;
 

@@ -1,10 +1,10 @@
 {
-  "name": "dms-sdk-client",
-  "version": "2.12.3",
+  "name": "dms-sdk-client-v2",
+  "version": "2.0.0",
   "author": "BOSagora Foundation",
   "license": "AGPL-3.0-or-later",
   "main": "dist/index.js",
-  "module": "dist/dms-sdk-client.esm.js",
+  "module": "dist/dms-sdk-client-v2.esm.js",
   "typings": "dist/index.d.ts",
   "files": [
     "dist"
@@ -80,9 +80,8 @@
     "@ethersproject/providers": "^5.7.0",
     "@ethersproject/random": "^5.7.0",
     "@ethersproject/wallet": "^5.7.0",
-    "del-osx-lib": "2.4.0",
-    "dms-osx-lib": "2.14.0",
-    "dms-sdk-common": "^1.1.0",
+    "dms-contracts-lib-v2": "~2.0.2",
+    "dms-sdk-common-v2": "~2.0.0",
     "graphql": "^16.5.0",
     "graphql-request": "^4.3.0",
     "unfetch": "^5.0.0"

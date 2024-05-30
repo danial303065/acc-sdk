@@ -1,10 +1,10 @@
 {
-  "name": "dms-sdk-common",
-  "version": "1.1.0",
+  "name": "dms-sdk-common-v2",
+  "version": "2.0.0",
   "author": "BOSagora Foundation",
   "license": "MIT",
   "main": "dist/index.js",
-  "module": "dist/dms-sdk-common.esm.js",
+  "module": "dist/dms-sdk-common-v2.esm.js",
   "typings": "dist/index.d.ts",
   "files": [
     "dist"

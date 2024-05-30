@@ -42,15 +42,11 @@ export interface PaymentDetailData {
     currency: string;
     shopId: BytesLike;
     account: string;
-    loyaltyType: LoyaltyType;
     paidPoint: BigNumber;
-    paidToken: BigNumber;
     paidValue: BigNumber;
     feePoint: BigNumber;
-    feeToken: BigNumber;
     feeValue: BigNumber;
     totalPoint: BigNumber;
-    totalToken: BigNumber;
     totalValue: BigNumber;
     paymentStatus: PaymentDetailTaskStatus;
 }
@@ -109,7 +105,6 @@ export type ApproveNewPaymentValue =
           shopId: BytesLike;
           approval: boolean;
           account: string;
-          loyaltyType: LoyaltyType;
           paidPoint: BigNumber;
           paidToken: BigNumber;
           paidValue: BigNumber;
@@ -154,7 +149,6 @@ export type ApproveCancelPaymentValue =
           purchaseId: string;
           approval: boolean;
           account: string;
-          loyaltyType: LoyaltyType;
           paidPoint: BigNumber;
           paidToken: BigNumber;
           paidValue: BigNumber;
@@ -206,18 +200,20 @@ export type WithdrawStepValue =
     | { key: WithdrawSteps.WITHDRAWING; txHash: BytesLike }
     | { key: WithdrawSteps.DONE; amount: BigNumber };
 
-export type ChangeLoyaltyTypeStepValue =
+export type ExchangePointToTokenStepValue =
     | {
           key: NormalSteps.PREPARED;
           account: string;
+          amount: BigNumberish;
           signature: BytesLike;
       }
     | { key: NormalSteps.SENT; txHash: BytesLike }
     | {
           key: NormalSteps.DONE;
           account: string;
-          amountToken: BigNumberish;
           amountPoint: BigNumberish;
+          amountToken: BigNumberish;
+          balancePoint: BigNumberish;
           balanceToken: BigNumberish;
       };
 
@@ -347,11 +343,6 @@ export type RemoveDelegateStepValue =
     | { key: NormalSteps.SENT; txHash: BytesLike; shopId: BytesLike; account: string; delegator: string }
     | { key: NormalSteps.DONE; shopId: BytesLike; account: string; delegator: string };
 
-export enum LoyaltyType {
-    POINT,
-    TOKEN
-}
-
 export interface LoyaltyPaymentEvent {
     paymentId: BytesLike;
     purchaseId: string;
@@ -359,7 +350,6 @@ export interface LoyaltyPaymentEvent {
     shopId: BytesLike;
     account: string;
     timestamp: BigNumber;
-    loyaltyType: number;
     paidPoint: BigNumber;
     paidToken: BigNumber;
     paidValue: BigNumber;
@@ -468,6 +458,7 @@ export type DelegatedTransferStepValue =
           from: string;
           to: string;
           amount: BigNumber;
+          expiry: number;
           signature: BytesLike;
       }
     | {
@@ -475,6 +466,7 @@ export type DelegatedTransferStepValue =
           from: string;
           to: string;
           amount: BigNumber;
+          expiry: number;
           signature: BytesLike;
           txHash: BytesLike;
       }
@@ -492,12 +484,14 @@ export type DepositViaBridgeStepValue =
           key: NormalSteps.PREPARED;
           account: string;
           amount: BigNumber;
+          expiry: number;
           signature: BytesLike;
       }
     | {
           key: NormalSteps.SENT;
           account: string;
           amount: BigNumber;
+          expiry: number;
           signature: BytesLike;
           tokenId: string;
           depositId: string;
@@ -518,12 +512,14 @@ export type WithdrawViaBridgeStepValue =
           key: NormalSteps.PREPARED;
           account: string;
           amount: BigNumber;
+          expiry: number;
           signature: BytesLike;
       }
     | {
           key: NormalSteps.SENT;
           account: string;
           amount: BigNumber;
+          expiry: number;
           signature: BytesLike;
           tokenId: string;
           depositId: string;

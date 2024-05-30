@@ -19,21 +19,22 @@ import {
     LoyaltyToken,
     LoyaltyToken__factory,
     LoyaltyTransfer,
-    LoyaltyTransfer__factory
-} from "dms-osx-lib";
+    LoyaltyTransfer__factory,
+    PhoneLinkCollection,
+    PhoneLinkCollection__factory
+} from "dms-contracts-lib-v2";
 import { JsonRpcProvider, Provider } from "@ethersproject/providers";
-import { NoProviderError, NoSignerError, UnsupportedNetworkError, UpdateAllowanceError } from "dms-sdk-common";
+import { NoProviderError, NoSignerError, UnsupportedNetworkError, UpdateAllowanceError } from "dms-sdk-common-v2";
 import { ContractUtils } from "../../utils/ContractUtils";
 import { GasPriceManager } from "../../utils/GasPriceManager";
 import { NonceManager } from "../../utils/NonceManager";
 import {
-    ChangeLoyaltyTypeStepValue,
+    ExchangePointToTokenStepValue,
     ChangeToPayablePointStepValue,
     DepositSteps,
     DepositStepValue,
     NormalSteps,
     QueryOption,
-    LoyaltyType,
     SortByBlock,
     SortDirection,
     UpdateAllowanceParams,
@@ -75,7 +76,6 @@ import { getNetwork } from "../../utils/Utilty";
 import { BigNumber } from "@ethersproject/bignumber";
 import { ContractTransaction } from "@ethersproject/contracts";
 import { QueryUserTradeHistory } from "../graphql-queries/user/history";
-import { PhoneLinkCollection, PhoneLinkCollection__factory } from "del-osx-lib";
 import { AddressZero } from "@ethersproject/constants";
 import { BytesLike } from "@ethersproject/bytes";
 
@@ -234,15 +234,11 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
                 currency: res.data.currency,
                 shopId: res.data.shopId,
                 account: res.data.account,
-                loyaltyType: res.data.loyaltyType,
                 paidPoint: BigNumber.from(res.data.paidPoint),
-                paidToken: BigNumber.from(res.data.paidToken),
                 paidValue: BigNumber.from(res.data.paidValue),
                 feePoint: BigNumber.from(res.data.feePoint),
-                feeToken: BigNumber.from(res.data.feeToken),
                 feeValue: BigNumber.from(res.data.feeValue),
                 totalPoint: BigNumber.from(res.data.totalPoint),
-                totalToken: BigNumber.from(res.data.totalToken),
                 totalValue: BigNumber.from(res.data.totalValue),
                 paymentStatus: res.data.paymentStatus
             };
@@ -347,7 +343,6 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
                 shopId: event.shopId,
                 approval,
                 account: event.account,
-                loyaltyType: event.loyaltyType,
                 paidPoint: event.paidPoint,
                 paidToken: event.paidToken,
                 paidValue: event.paidValue,
@@ -380,16 +375,15 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
             shopId: detail.shopId,
             account: detail.account,
             timestamp: BigNumber.from(ContractUtils.getTimeStamp()),
-            loyaltyType: detail.loyaltyType,
-            paidPoint: detail.loyaltyType === LoyaltyType.POINT ? BigNumber.from(detail.paidPoint) : BigNumber.from(0),
-            paidToken: detail.loyaltyType === LoyaltyType.TOKEN ? BigNumber.from(detail.paidToken) : BigNumber.from(0),
+            paidPoint: BigNumber.from(detail.paidPoint),
+            paidToken: BigNumber.from(0),
             paidValue: BigNumber.from(detail.paidValue),
 
-            feePoint: detail.loyaltyType === LoyaltyType.POINT ? BigNumber.from(detail.feePoint) : BigNumber.from(0),
-            feeToken: detail.loyaltyType === LoyaltyType.TOKEN ? BigNumber.from(detail.feeToken) : BigNumber.from(0),
+            feePoint: BigNumber.from(detail.feePoint),
+            feeToken: BigNumber.from(0),
             feeValue: BigNumber.from(detail.feeValue),
             totalPoint: detail.paidPoint.add(detail.feePoint),
-            totalToken: detail.paidToken.add(detail.feeToken),
+            totalToken: BigNumber.from(0),
             totalValue: detail.paidValue.add(detail.feeValue)
         };
     }
@@ -471,7 +465,6 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
                 purchaseId: event.purchaseId,
                 approval,
                 account: account,
-                loyaltyType: event.loyaltyType,
                 paidPoint: event.paidPoint,
                 paidToken: event.paidToken,
                 paidValue: event.paidValue,
@@ -510,25 +503,11 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
             res.shopId = parsedLog.args.payment.shopId;
             res.account = parsedLog.args.payment.account;
             res.timestamp = parsedLog.args.payment.timestamp;
-            res.loyaltyType = parsedLog.args.payment.loyaltyType;
-            res.paidPoint =
-                parsedLog.args.payment.loyaltyType === LoyaltyType.POINT
-                    ? BigNumber.from(parsedLog.args.payment.paidPoint)
-                    : BigNumber.from(0);
-            res.paidToken =
-                parsedLog.args.payment.loyaltyType === LoyaltyType.TOKEN
-                    ? BigNumber.from(parsedLog.args.payment.paidToken)
-                    : BigNumber.from(0);
+            res.paidPoint = BigNumber.from(parsedLog.args.payment.paidPoint);
+            res.paidToken = BigNumber.from(parsedLog.args.payment.paidToken);
             res.paidValue = BigNumber.from(parsedLog.args.payment.paidValue);
-
-            res.feePoint =
-                parsedLog.args.payment.loyaltyType === LoyaltyType.POINT
-                    ? BigNumber.from(parsedLog.args.payment.feePoint)
-                    : BigNumber.from(0);
-            res.feeToken =
-                parsedLog.args.payment.loyaltyType === LoyaltyType.TOKEN
-                    ? BigNumber.from(parsedLog.args.payment.feeToken)
-                    : BigNumber.from(0);
+            res.feePoint = BigNumber.from(parsedLog.args.payment.feePoint);
+            res.feeToken = BigNumber.from(parsedLog.args.payment.feeToken);
             res.feeValue = BigNumber.from(parsedLog.args.payment.feeValue);
 
             res.totalPoint = res.paidPoint.add(res.feePoint);
@@ -659,7 +638,7 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
         const ledgerContract: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), signer);
 
         const currentDepositAmount = await ledgerContract.tokenBalanceOf(account);
-        if (currentDepositAmount.lte(amount)) throw new InsufficientBalanceError();
+        if (currentDepositAmount.lt(amount)) throw new InsufficientBalanceError();
 
         const nonceSigner = new NonceManager(new GasPriceManager(signer));
         const tx = await ledgerContract.connect(nonceSigner).withdraw(amount);
@@ -736,10 +715,10 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
     }
 
     /**
-     * 적립되는 로얄티의 종류를 변경한다.
-     * @return {AsyncGenerator<ChangeLoyaltyTypeStepValue>}
+     * 포인트 를 토큰 으로 변환
+     * @return {AsyncGenerator<ExchangePointToTokenStepValue>}
      */
-    public async *changeToLoyaltyToken(): AsyncGenerator<ChangeLoyaltyTypeStepValue> {
+    public async *exchangePointToToken(amount: BigNumber): AsyncGenerator<ExchangePointToTokenStepValue> {
         const signer = this.web3.getConnectedSigner();
         if (!signer) {
             throw new NoSignerError();
@@ -755,17 +734,20 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
 
         const ledgerContract: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), signer);
         const account: string = await signer.getAddress();
+        const adjustedAmount = ContractUtils.zeroGWEI(amount);
         let contractTx: ContractTransaction;
         const nonce = await ledgerContract.nonceOf(account);
-        const signature = await ContractUtils.signLoyaltyType(signer, nonce, network.chainId);
+        const message = ContractUtils.getChangePointToTokenMessage(account, adjustedAmount, nonce, network.chainId);
+        const signature = await ContractUtils.signMessage(signer, message);
 
-        yield { key: NormalSteps.PREPARED, account, signature };
+        yield { key: NormalSteps.PREPARED, account, amount: adjustedAmount, signature };
 
         const param = {
             account,
+            amount: adjustedAmount.toString(),
             signature
         };
-        const res = await Network.post(await this.getEndpoint("/v1/ledger/changeToLoyaltyToken"), param);
+        const res = await Network.post(await this.getEndpoint("/v1/ledger/exchangePointToToken"), param);
         if (res.code !== 0) {
             throw new InternalServerError(res?.error?.message ?? "");
         }
@@ -779,7 +761,7 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
             this.web3.getLedgerAddress(),
             signer
         );
-        const log = findLog(txReceipt, exchangerContract.interface, "ChangedToLoyaltyToken");
+        const log = findLog(txReceipt, exchangerContract.interface, "ChangedPointToToken");
         if (!log) {
             throw new FailedPayTokenError();
         }
@@ -790,27 +772,9 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
             account: parsedLog.args["account"],
             amountToken: parsedLog.args["amountToken"],
             amountPoint: parsedLog.args["amountPoint"],
-            balanceToken: parsedLog.args["balanceToken"]
+            balanceToken: parsedLog.args["balanceToken"],
+            balancePoint: parsedLog.args["balancePoint"]
         };
-    }
-
-    /**
-     * 적립되는 로얄티의 종류를 리턴한다.
-     * @param {string} account - 지갑 주소
-     * @return {Promise<BigNumber>} 포인트 잔고
-     */
-    public async getLoyaltyType(account: string): Promise<LoyaltyType> {
-        const provider = this.web3.getProvider() as Provider;
-        if (!provider) throw new NoProviderError();
-
-        const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
-        const ledgerInstance: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), provider);
-        return await ledgerInstance.loyaltyTypeOf(account);
     }
 
     /**
@@ -1185,17 +1149,27 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
 
         let contractTx: ContractTransaction;
         const nonce = await this.getNonceOfLedger(account);
-        const message = await ContractUtils.getTransferMessage(account, to, adjustedAmount, nonce, network.chainId);
+        const expiry = ContractUtils.getTimeStamp() + 60;
+        const message = ContractUtils.getTransferMessage(
+            network.chainId,
+            this.web3.getLoyaltyTransferAddress(),
+            account,
+            to,
+            adjustedAmount,
+            nonce,
+            expiry
+        );
         const signature = await ContractUtils.signMessage(signer, message);
 
         const param = {
             from: account,
             to,
             amount: adjustedAmount.toString(),
+            expiry,
             signature
         };
 
-        yield { key: NormalSteps.PREPARED, from: account, to, amount: adjustedAmount, signature };
+        yield { key: NormalSteps.PREPARED, from: account, to, amount: adjustedAmount, expiry, signature };
 
         const res = await Network.post(await this.getEndpoint("/v1/ledger/transfer"), param);
         if (res.code !== 0) {
@@ -1204,7 +1178,15 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
 
         contractTx = (await signer.provider.getTransaction(res.data.txHash)) as ContractTransaction;
 
-        yield { key: NormalSteps.SENT, from: account, to, amount: adjustedAmount, signature, txHash: res.data.txHash };
+        yield {
+            key: NormalSteps.SENT,
+            from: account,
+            to,
+            amount: adjustedAmount,
+            expiry,
+            signature,
+            txHash: res.data.txHash
+        };
         const txReceipt = await contractTx.wait();
 
         const transferContract: LoyaltyTransfer = LoyaltyTransfer__factory.connect(
@@ -1243,22 +1225,26 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
         const adjustedAmount = ContractUtils.zeroGWEI(amount);
 
         const nonce = await this.getNonceOfMainChainToken(account);
-        const message = await ContractUtils.getTransferMessage(
+        const expiry = ContractUtils.getTimeStamp() + 60;
+        const message = ContractUtils.getTransferMessage(
+            chainInfo.network.chainId,
+            chainInfo.contract.token,
             account,
             chainInfo.contract.loyaltyBridge,
             adjustedAmount,
             nonce,
-            chainInfo.network.chainId
+            expiry
         );
         const signature = await ContractUtils.signMessage(signer, message);
 
         const param = {
             account,
             amount: adjustedAmount.toString(),
+            expiry,
             signature
         };
 
-        yield { key: NormalSteps.PREPARED, account, amount: adjustedAmount, signature };
+        yield { key: NormalSteps.PREPARED, account, amount: adjustedAmount, expiry, signature };
 
         const res = await Network.post(await this.getEndpoint("/v1/ledger/deposit_via_bridge"), param);
         if (res.code !== 0) {
@@ -1269,6 +1255,7 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
             key: NormalSteps.SENT,
             account,
             amount: adjustedAmount,
+            expiry,
             signature,
             tokenId: res.data.tokenId,
             depositId: res.data.depositId,
@@ -1360,22 +1347,26 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
         const adjustedAmount = ContractUtils.zeroGWEI(amount);
 
         const nonce = await this.getNonceOfLedger(account);
-        const message = await ContractUtils.getTransferMessage(
+        const expiry = ContractUtils.getTimeStamp() + 60;
+        const message = ContractUtils.getTransferMessage(
+            chainInfo.network.chainId,
+            chainInfo.contract.token,
             account,
             chainInfo.contract.loyaltyBridge,
             adjustedAmount,
             nonce,
-            chainInfo.network.chainId
+            expiry
         );
         const signature = await ContractUtils.signMessage(signer, message);
 
         const param = {
             account,
             amount: adjustedAmount.toString(),
+            expiry,
             signature
         };
 
-        yield { key: NormalSteps.PREPARED, account, amount: adjustedAmount, signature };
+        yield { key: NormalSteps.PREPARED, account, amount: adjustedAmount, expiry, signature };
 
         const res = await Network.post(await this.getEndpoint("/v1/ledger/withdraw_via_bridge"), param);
         if (res.code !== 0) {
@@ -1386,6 +1377,7 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
             key: NormalSteps.SENT,
             account,
             amount: adjustedAmount,
+            expiry,
             signature,
             tokenId: res.data.tokenId,
             depositId: res.data.depositId,
@@ -1487,12 +1479,15 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
         const account = await signer.getAddress();
         const adjustedAmount = ContractUtils.zeroGWEI(amount);
         const nonce = await this.getNonceOfMainChainToken(account);
-        const message = await ContractUtils.getTransferMessage(
+        const expiry = ContractUtils.getTimeStamp() + 60;
+        const message = ContractUtils.getTransferMessage(
+            chainInfo.network.chainId,
+            chainInfo.contract.token,
             account,
             to,
             adjustedAmount,
             nonce,
-            chainInfo.network.chainId
+            expiry
         );
         const signature = await ContractUtils.signMessage(signer, message);
 
@@ -1500,17 +1495,26 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
             from: account,
             to,
             amount: adjustedAmount.toString(),
+            expiry,
             signature
         };
 
-        yield { key: NormalSteps.PREPARED, from: account, to, amount: adjustedAmount, signature };
+        yield { key: NormalSteps.PREPARED, from: account, to, amount: adjustedAmount, expiry, signature };
 
         const res = await Network.post(await this.getEndpoint("/v1/token/main/transfer"), param);
         if (res.code !== 0) {
             throw new InternalServerError(res?.error?.message ?? "");
         }
 
-        yield { key: NormalSteps.SENT, from: account, to, amount: adjustedAmount, signature, txHash: res.data.txHash };
+        yield {
+            key: NormalSteps.SENT,
+            from: account,
+            to,
+            amount: adjustedAmount,
+            expiry,
+            signature,
+            txHash: res.data.txHash
+        };
 
         const provider = await this.getProviderOfMainChain();
         const contractTx = (await provider.getTransaction(res.data.txHash)) as ContractTransaction;
@@ -1549,12 +1553,15 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
         const account = await signer.getAddress();
         const adjustedAmount = ContractUtils.zeroGWEI(amount);
         const nonce = await this.getNonceOfSideChainToken(account);
-        const message = await ContractUtils.getTransferMessage(
+        const expiry = ContractUtils.getTimeStamp() + 60;
+        const message = ContractUtils.getTransferMessage(
+            chainInfo.network.chainId,
+            chainInfo.contract.token,
             account,
             to,
             adjustedAmount,
             nonce,
-            chainInfo.network.chainId
+            expiry
         );
         const signature = await ContractUtils.signMessage(signer, message);
 
@@ -1562,17 +1569,26 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
             from: account,
             to,
             amount: adjustedAmount.toString(),
+            expiry,
             signature
         };
 
-        yield { key: NormalSteps.PREPARED, from: account, to, amount: adjustedAmount, signature };
+        yield { key: NormalSteps.PREPARED, from: account, to, amount: adjustedAmount, expiry, signature };
 
         const res = await Network.post(await this.getEndpoint("/v1/token/side/transfer"), param);
         if (res.code !== 0) {
             throw new InternalServerError(res?.error?.message ?? "");
         }
 
-        yield { key: NormalSteps.SENT, from: account, to, amount: adjustedAmount, signature, txHash: res.data.txHash };
+        yield {
+            key: NormalSteps.SENT,
+            from: account,
+            to,
+            amount: adjustedAmount,
+            expiry,
+            signature,
+            txHash: res.data.txHash
+        };
 
         const provider = await this.getProviderOfSideChain();
         const contractTx = (await provider.getTransaction(res.data.txHash)) as ContractTransaction;

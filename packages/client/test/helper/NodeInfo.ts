@@ -25,19 +25,20 @@ import {
     LoyaltyProvider__factory,
     LoyaltyTransfer,
     LoyaltyTransfer__factory,
+    PhoneLinkCollection,
+    PhoneLinkCollection__factory,
     Shop,
     Shop__factory,
     LoyaltyToken,
     LoyaltyToken__factory,
     Validator,
     Validator__factory
-} from "dms-osx-lib";
-import { PhoneLinkCollection, PhoneLinkCollection__factory } from "del-osx-lib";
+} from "dms-contracts-lib-v2";
 import { IShopData } from "./types";
 import { Signer } from "@ethersproject/abstract-signer";
 import { Network } from "@ethersproject/networks";
 import { getNetwork } from "../../src/utils/Utilty";
-import { InvalidAddressError, UnsupportedNetworkError } from "dms-sdk-common";
+import { InvalidAddressError, UnsupportedNetworkError } from "dms-sdk-common-v2";
 import { isAddress } from "@ethersproject/address";
 import { AddressZero } from "@ethersproject/constants";
 
@@ -124,14 +125,14 @@ export class NodeInfo {
         const accounts: string[] = [];
         const reg_bytes64: RegExp = /^(0x)[0-9a-f]{64}$/i;
         if (
-            process.env.DEPLOYER !== undefined &&
-            process.env.DEPLOYER.trim() !== "" &&
-            reg_bytes64.test(process.env.DEPLOYER)
+            process.env.DEPLOYER_SIDE_CHAIN !== undefined &&
+            process.env.DEPLOYER_SIDE_CHAIN.trim() !== "" &&
+            reg_bytes64.test(process.env.DEPLOYER_SIDE_CHAIN)
         ) {
-            accounts.push(process.env.DEPLOYER);
+            accounts.push(process.env.DEPLOYER_SIDE_CHAIN);
         } else {
-            process.env.DEPLOYER = Wallet.createRandom().privateKey;
-            accounts.push(process.env.DEPLOYER);
+            process.env.DEPLOYER_SIDE_CHAIN = Wallet.createRandom().privateKey;
+            accounts.push(process.env.DEPLOYER_SIDE_CHAIN);
         }
 
         if (process.env.OWNER !== undefined && process.env.OWNER.trim() !== "" && reg_bytes64.test(process.env.OWNER)) {

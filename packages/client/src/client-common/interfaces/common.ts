@@ -4,7 +4,10 @@ export enum SupportedNetwork {
     LOYALTY_MAINNET = "loyalty_mainnet",
     LOYALTY_TESTNET = "loyalty_testnet",
     LOYALTY_DEVNET = "loyalty_devnet",
-    BOSAGORA_LOCAL = "localhost"
+    ACC_MAINNET = "acc_mainnet",
+    ACC_TESTNET = "acc_testnet",
+    ACC_DEVNET = "acc_devnet",
+    LOCAL = "localhost"
 }
 
 export const SupportedNetworkArray = Object.values(SupportedNetwork);

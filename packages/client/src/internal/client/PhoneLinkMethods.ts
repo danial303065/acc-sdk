@@ -6,8 +6,8 @@ import {
     SupportedNetwork,
     SupportedNetworkArray
 } from "../../client-common";
-import { PhoneLinkCollection, PhoneLinkCollection__factory } from "del-osx-lib";
-import { NoProviderError, NoSignerError, UnsupportedNetworkError } from "dms-sdk-common";
+import { PhoneLinkCollection, PhoneLinkCollection__factory } from "dms-contracts-lib-v2";
+import { NoProviderError, NoSignerError, UnsupportedNetworkError } from "dms-sdk-common-v2";
 import {
     NormalSteps,
     PhoneLinkRegisterSteps,

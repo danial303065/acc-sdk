@@ -14,7 +14,6 @@ export const QueryUserTradeHistory = gql`
             pageType
             action
             cancel
-            loyaltyType
             amountPoint
             amountToken
             amountValue

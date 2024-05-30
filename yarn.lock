@@ -1164,13 +1164,6 @@
   dependencies:
     "@ethersproject/logger" "^5.7.0"
 
-"@ethersproject/networks@npm:boa-networks@5.7.2":
-  version "5.7.2"
-  resolved "https://registry.yarnpkg.com/boa-networks/-/boa-networks-5.7.2.tgz#eb8f8c1d27f10f1bfd987c25898116376d85e44f"
-  integrity sha512-vIowYIROUFXTjSB2W+ouxVCHtLAbe/w1Aff314rGtgIZgPcsmSLP056RWi5Iu0jyX/fU6YDs9w5lJ+rNCsmbgQ==
-  dependencies:
-    "@ethersproject/logger" "^5.7.0"
-
 "@ethersproject/pbkdf2@5.7.0", "@ethersproject/pbkdf2@^5.7.0":
   version "5.7.0"
   resolved "https://registry.npmjs.org/@ethersproject/pbkdf2/-/pbkdf2-5.7.0.tgz"
@@ -2865,13 +2858,6 @@ define-property@^2.0.2:
     is-descriptor "^1.0.2"
     isobject "^3.0.1"
 
-del-osx-lib@2.4.0:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/del-osx-lib/-/del-osx-lib-2.4.0.tgz#82b22e6040538f9340499a0e91325cc35143cbd0"
-  integrity sha512-AYN7B2DDKHTlh6dcJJBs85GG37QwE4CexWk9oFKlINyzvavbG3DsvakrPikTe2T53WC0nvzOp1osOklOFT+XKw==
-  dependencies:
-    ethers "npm:boa-ethers2@^5.7.9"
-
 delayed-stream@~1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/delayed-stream/-/delayed-stream-1.0.0.tgz"
@@ -2899,10 +2885,10 @@ dir-glob@^3.0.1:
   dependencies:
     path-type "^4.0.0"
 
-dms-osx-lib@2.14.0:
-  version "2.14.0"
-  resolved "https://registry.yarnpkg.com/dms-osx-lib/-/dms-osx-lib-2.14.0.tgz#2d821034115f5309e8ee130b707639fcec462775"
-  integrity sha512-Mxh7eM2LrAIlqafGHuDoKQTKk2WsRH5DD4Rr0l1NIBmxNjBwGCbucdj9l1Hw65uPqGfupopi1c5Xk1X7cOHQxw==
+dms-contracts-lib-v2@~2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/dms-contracts-lib-v2/-/dms-contracts-lib-v2-2.0.2.tgz#8d39235c86bb6107c6ff6b615694e87bd111916b"
+  integrity sha512-R8KBjcEyrYdN/xonPTJ25xQZTPM6mSsnKXgssCXCF1vKm0QLMvCd+iQXCPE/WhzvORxLKUfMfSTOMKVK1zzpyQ==
   dependencies:
     ethers "5.7.0"
 
@@ -3535,42 +3521,6 @@ ethers@^5.7.0:
     "@ethersproject/keccak256" "5.7.0"
     "@ethersproject/logger" "5.7.0"
     "@ethersproject/networks" "5.7.1"
-    "@ethersproject/pbkdf2" "5.7.0"
-    "@ethersproject/properties" "5.7.0"
-    "@ethersproject/providers" "5.7.2"
-    "@ethersproject/random" "5.7.0"
-    "@ethersproject/rlp" "5.7.0"
-    "@ethersproject/sha2" "5.7.0"
-    "@ethersproject/signing-key" "5.7.0"
-    "@ethersproject/solidity" "5.7.0"
-    "@ethersproject/strings" "5.7.0"
-    "@ethersproject/transactions" "5.7.0"
-    "@ethersproject/units" "5.7.0"
-    "@ethersproject/wallet" "5.7.0"
-    "@ethersproject/web" "5.7.1"
-    "@ethersproject/wordlists" "5.7.0"
-
-"ethers@npm:boa-ethers2@^5.7.9":
-  version "5.7.9"
-  resolved "https://registry.yarnpkg.com/boa-ethers2/-/boa-ethers2-5.7.9.tgz#b84ecd2d9370918a700d16dea35533740ca96d71"
-  integrity sha512-TWmkAAwQuFjxSSJpbDgOIqpMS5EuCwNIsSxxPF31DxQnle1jX98UoAcEt2++/sLD3Zy2fB2pyhseD1e6zATClg==
-  dependencies:
-    "@ethersproject/abi" "5.7.0"
-    "@ethersproject/abstract-provider" "5.7.0"
-    "@ethersproject/abstract-signer" "5.7.0"
-    "@ethersproject/address" "5.7.0"
-    "@ethersproject/base64" "5.7.0"
-    "@ethersproject/basex" "5.7.0"
-    "@ethersproject/bignumber" "5.7.0"
-    "@ethersproject/bytes" "5.7.0"
-    "@ethersproject/constants" "5.7.0"
-    "@ethersproject/contracts" "5.7.0"
-    "@ethersproject/hash" "5.7.0"
-    "@ethersproject/hdnode" "5.7.0"
-    "@ethersproject/json-wallets" "5.7.0"
-    "@ethersproject/keccak256" "5.7.0"
-    "@ethersproject/logger" "5.7.0"
-    "@ethersproject/networks" "npm:boa-networks@5.7.2"
     "@ethersproject/pbkdf2" "5.7.0"
     "@ethersproject/properties" "5.7.0"
     "@ethersproject/providers" "5.7.2"
