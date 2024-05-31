@@ -5,7 +5,7 @@ import { Network } from "../../src/client-common/interfaces/network";
 import * as assert from "assert";
 // @ts-ignore
 import fs from "fs";
-import { AccountIndex, NodeInfo } from "../helper/NodeInfo";
+import { NodeInfo } from "../helper/NodeInfo";
 
 interface IUserData {
     idx: number;
@@ -25,28 +25,8 @@ export interface IShopData {
 
 describe("Ledger", () => {
     const contextParams = NodeInfo.getContextParams();
-    const contractInfo = NodeInfo.getContractInfo();
-    const accounts = NodeInfo.accounts();
-    const validatorWallets = [
-        accounts[AccountIndex.VALIDATOR01],
-        accounts[AccountIndex.VALIDATOR02],
-        accounts[AccountIndex.VALIDATOR03],
-        accounts[AccountIndex.VALIDATOR04],
-        accounts[AccountIndex.VALIDATOR05],
-        accounts[AccountIndex.VALIDATOR06],
-        accounts[AccountIndex.VALIDATOR07],
-        accounts[AccountIndex.VALIDATOR08],
-        accounts[AccountIndex.VALIDATOR09],
-        accounts[AccountIndex.VALIDATOR10],
-        accounts[AccountIndex.VALIDATOR11],
-        accounts[AccountIndex.VALIDATOR12],
-        accounts[AccountIndex.VALIDATOR13],
-        accounts[AccountIndex.VALIDATOR14],
-        accounts[AccountIndex.VALIDATOR15],
-        accounts[AccountIndex.VALIDATOR16]
-    ];
     let client: Client;
-    const users: IUserData[] = JSON.parse(fs.readFileSync("test/helper/users_mobile.json", "utf8"));
+    const users: IUserData[] = JSON.parse(fs.readFileSync("test/helper/users.json", "utf8"));
     const shopData: IShopData[] = JSON.parse(fs.readFileSync("test/helper/shops.json", "utf8"));
     let user = new Wallet(users[5].privateKey);
     beforeAll(async () => {
@@ -60,14 +40,10 @@ describe("Ledger", () => {
         expect(isUp).toEqual(true);
     });
 
-    it("Set Exchange Rate", async () => {
-        await NodeInfo.setExchangeRate(contractInfo.currencyRate, validatorWallets);
-    });
-
     it("Test for token's payment", async () => {
         for (let idx = 0; idx < 10; idx++) {
             console.log(`idx: ${idx}`);
-            const oldBalance = await client.ledger.getTokenBalance(user.address);
+            const oldBalance = await client.ledger.getPointBalance(user.address);
             const purchase = {
                 purchaseId: "P000001",
                 timestamp: 1672844400,
@@ -85,9 +61,6 @@ describe("Ledger", () => {
                 amount.value.mul(feeRate).div(10000),
                 purchase.currency
             );
-
-            const paidToken = await client.currency.pointToToken(paidPoint);
-            const feeToken = await client.currency.pointToToken(feePoint);
 
             // Open New
             console.log("Open New");
@@ -149,9 +122,8 @@ describe("Ledger", () => {
                         expect(step.purchaseId).toEqual(detail.purchaseId);
                         expect(step.currency).toEqual(detail.currency.toLowerCase());
                         expect(step.shopId).toEqual(detail.shopId);
-                        // expect(step.paidToken).toEqual(paidToken);
-                        // expect(step.paidValue).toEqual(amount.value);
-                        expect(step.feeToken).toEqual(feeToken);
+                        expect(step.paidPoint).toEqual(paidPoint);
+                        expect(step.feePoint).toEqual(feePoint);
                         break;
                     default:
                         throw new Error("Unexpected pay point step: " + JSON.stringify(step, null, 2));
@@ -177,8 +149,8 @@ describe("Ledger", () => {
             await ContractUtils.delay(2000);
 
             assert.deepStrictEqual(
-                await client.ledger.getTokenBalance(user.address),
-                oldBalance.sub(paidToken).sub(feeToken)
+                await client.ledger.getPointBalance(user.address),
+                oldBalance.sub(paidPoint).sub(feePoint)
             );
         }
     });
