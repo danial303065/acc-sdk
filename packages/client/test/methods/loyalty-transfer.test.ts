@@ -36,9 +36,8 @@ describe("LoyaltyTransfer", () => {
     ];
 
     let client: Client;
-    const users: IUserData[] = (JSON.parse(fs.readFileSync("test/helper/users.json", "utf8")) as IUserData[]).filter(
-        (m) => m.loyaltyType === 1
-    );
+    const users: IUserData[] = JSON.parse(fs.readFileSync("test/helper/users.json", "utf8")) as IUserData[];
+
     beforeAll(async () => {
         contextParams.signer = new Wallet(users[0].privateKey);
         const ctx = new Context(contextParams);

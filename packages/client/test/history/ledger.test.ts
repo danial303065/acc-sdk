@@ -39,36 +39,48 @@ describe("Integrated test of Ledger", () => {
                 const web3IsUp = await client.web3.isUp();
                 expect(web3IsUp).toEqual(true);
                 await ContractUtils.delay(1000);
-                const isUp: boolean = await client.graphql.isUp();
-                await ContractUtils.delay(1000);
-                expect(isUp).toEqual(true);
             });
 
             it("Get Save & Use History", async () => {
                 for (const user of users) {
-                    const res = await client.ledger.getSaveAndUseHistory(user.address);
-                    const length = res.userTradeHistories.length;
+                    const res = await client.ledger.getSaveAndUseHistory(user.address, 1, 100);
+                    const length = res.items.length;
                     if (length > 0) {
-                        expect(res.userTradeHistories[length - 1].account.toUpperCase()).toEqual(
-                            user.address.toUpperCase()
-                        );
-                        expect([LedgerAction.SAVED, LedgerAction.USED, LedgerAction.CHANGED]).toContain(
-                            res.userTradeHistories[length - 1].action
-                        );
+                        expect(res.items[length - 1].account.toUpperCase()).toEqual(user.address.toUpperCase());
+                        expect([
+                            LedgerAction.SAVED,
+                            LedgerAction.USED,
+                            LedgerAction.BURNED,
+                            LedgerAction.CHANGED_TO_PAYABLE_POINT,
+                            LedgerAction.CHANGED_TO_TOKEN,
+                            LedgerAction.CHANGED_TO_POINT,
+                            LedgerAction.REFUND
+                        ]).toContain(res.items[length - 1].action);
                     }
                 }
             });
 
             it("Get Deposit & Withdraw History", async () => {
                 for (const user of users) {
-                    const res = await client.ledger.getDepositAndWithdrawHistory(user.address);
-                    const length = res.userTradeHistories.length;
+                    const res = await client.ledger.getDepositAndWithdrawHistory(user.address, 1, 100);
+                    const length = res.items.length;
                     if (length > 0) {
-                        expect(res.userTradeHistories[length - 1].account.toUpperCase()).toEqual(
-                            user.address.toUpperCase()
-                        );
+                        expect(res.items[length - 1].account.toUpperCase()).toEqual(user.address.toUpperCase());
                         expect([LedgerAction.DEPOSITED, LedgerAction.WITHDRAWN]).toContain(
-                            res.userTradeHistories[length - 1].action
+                            res.items[length - 1].action
+                        );
+                    }
+                }
+            });
+
+            it("Get Transfer History", async () => {
+                for (const user of users) {
+                    const res = await client.ledger.getTransferHistory(user.address, 1, 100);
+                    const length = res.items.length;
+                    if (length > 0) {
+                        expect(res.items[length - 1].account.toUpperCase()).toEqual(user.address.toUpperCase());
+                        expect([LedgerAction.TRANSFER_OUT, LedgerAction.TRANSFER_IN]).toContain(
+                            res.items[length - 1].action
                         );
                     }
                 }

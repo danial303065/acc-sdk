@@ -36,9 +36,8 @@ describe("LoyaltyBridge", () => {
     ];
 
     let client: Client;
-    const users: IUserData[] = (JSON.parse(fs.readFileSync("test/helper/users.json", "utf8")) as IUserData[]).filter(
-        (m) => m.loyaltyType === 1
-    );
+    const users: IUserData[] = JSON.parse(fs.readFileSync("test/helper/users.json", "utf8")) as IUserData[];
+
     beforeAll(async () => {
         contextParams.signer = new Wallet(users[0].privateKey);
         const ctx = new Context(contextParams);
@@ -59,7 +58,7 @@ describe("LoyaltyBridge", () => {
     });
 
     it("Test of the deposit via bridge", async () => {
-        const userIdx = 2;
+        const userIdx = 0;
         const sideChainInfo = await client.ledger.getChainInfoOfSideChain();
         const fee = sideChainInfo.network.bridgeFee;
         const amount = Amount.make(100, 18).value;
@@ -128,7 +127,7 @@ describe("LoyaltyBridge", () => {
     });
 
     it("Test of the withdraw via bridge", async () => {
-        const userIdx = 5;
+        const userIdx = 0;
         const mainChainInfo = await client.ledger.getChainInfoOfMainChain();
         const fee = mainChainInfo.network.bridgeFee;
         const amount = Amount.make(100, 18).value;

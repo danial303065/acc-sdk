@@ -145,6 +145,20 @@ export class ContractUtils {
         return "0x" + networkId.toString(16).padStart(4, "0") + keccak256(encodedResult).substring(2, 62);
     }
 
+    public static getShopRefundMessage(
+        shopId: BytesLike,
+        account: string,
+        amount: BigNumberish,
+        nonce: BigNumberish,
+        chainId: BigNumberish
+    ): Uint8Array {
+        const encodedResult = defaultAbiCoder.encode(
+            ["bytes32", "address", "uint256", "uint256", "uint256"],
+            [shopId, account, amount, chainId, nonce]
+        );
+        return arrayify(keccak256(encodedResult));
+    }
+
     public static getShopAccountMessage(
         shopId: BytesLike,
         account: string,

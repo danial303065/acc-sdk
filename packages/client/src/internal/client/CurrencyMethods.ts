@@ -22,21 +22,17 @@ export class CurrencyMethods extends ClientCore implements ICurrencyMethods {
      * @param symbol 통화코드
      */
     public async getRate(symbol: string): Promise<BigNumber> {
-        if (symbol === "krw") {
-            return this.getMultiple();
-        } else {
-            const provider = this.web3.getProvider() as Provider;
-            if (!provider) throw new NoProviderError();
+        const provider = this.web3.getProvider() as Provider;
+        if (!provider) throw new NoProviderError();
 
-            const network = getNetwork((await provider.getNetwork()).chainId);
-            const networkName = network.name as SupportedNetwork;
-            if (!SupportedNetworkArray.includes(networkName)) {
-                throw new UnsupportedNetworkError(networkName);
-            }
-
-            const contract: CurrencyRate = CurrencyRate__factory.connect(this.web3.getCurrencyRateAddress(), provider);
-            return await contract.get(symbol);
+        const network = getNetwork((await provider.getNetwork()).chainId);
+        const networkName = network.name as SupportedNetwork;
+        if (!SupportedNetworkArray.includes(networkName)) {
+            throw new UnsupportedNetworkError(networkName);
         }
+
+        const contract: CurrencyRate = CurrencyRate__factory.connect(this.web3.getCurrencyRateAddress(), provider);
+        return await contract.get(symbol);
     }
 
     private static _CurrencyMultiple: BigNumber = BigNumber.from(0);

@@ -12,32 +12,28 @@ import { NoProviderError, NoSignerError, UnsupportedNetworkError } from "dms-sdk
 import { ContractUtils } from "../../utils/ContractUtils";
 import {
     AddShopStepValue,
-    CloseWithdrawalShopStepValue,
     NormalSteps,
-    OpenWithdrawalShopStepValue,
-    QueryOption,
     ShopData,
-    SortByBlock,
-    SortDirection,
     ShopDetailData,
     ApproveShopStepValue,
     ShopUpdateEvent,
     ShopStatusEvent,
-    ShopPageType,
     CreateDelegateStepValue,
-    RemoveDelegateStepValue
+    RemoveDelegateStepValue,
+    RefundShopStepValue,
+    ShopAction,
+    ShopRefundableData
 } from "../../interfaces";
 import { FailedAddShopError, FailedApprovePayment, InternalServerError, NoHttpModuleError } from "../../utils/errors";
 import { Network } from "../../client-common/interfaces/network";
 import { findLog } from "../../client-common/utils";
 import { getNetwork } from "../../utils/Utilty";
 
-import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
+import { BigNumber } from "@ethersproject/bignumber";
 import { ContractTransaction } from "@ethersproject/contracts";
 import { IShopMethods } from "../../interface/IShop";
 import { BytesLike } from "@ethersproject/bytes";
 
-import { QueryShopTradeHistory } from "../graphql-queries/shop/history";
 import { AddressZero } from "@ethersproject/constants";
 
 /**
@@ -55,6 +51,7 @@ export class ShopMethods extends ClientCore implements IShopMethods, IClientHttp
         Object.freeze(this);
     }
 
+    // region Common
     /**
      * 릴레이 서버가 정상적인 상태인지 검사한다.
      * @return {Promise<boolean>} 이 값이 true 이면 릴레이 서버가 정상이다.
@@ -100,77 +97,6 @@ export class ShopMethods extends ClientCore implements IShopMethods, IClientHttp
     }
 
     /**
-     * 상점주가 정산금에 대해서 인출가능한 금액을 제공한다.
-     * @param shopId 상점의 아이디
-     * @return {Promise<BigNumber>} 인출가능금액
-     */
-    public async getWithdrawableAmount(shopId: BytesLike): Promise<BigNumber> {
-        const provider = this.web3.getProvider() as Provider;
-        if (!provider) throw new NoProviderError();
-
-        const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
-        const shopContract: Shop = Shop__factory.connect(this.web3.getShopAddress(), provider);
-        return await shopContract.withdrawableOf(shopId);
-    }
-
-    public async isAvailableId(shopId: BytesLike): Promise<boolean> {
-        const provider = this.web3.getProvider() as Provider;
-        if (!provider) throw new NoProviderError();
-
-        const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
-        const shopContract: Shop = Shop__factory.connect(this.web3.getShopAddress(), provider);
-        return await shopContract.isAvailableId(shopId);
-    }
-
-    public async getShops(from: number, to: number): Promise<BytesLike[]> {
-        const signer = this.web3.getConnectedSigner();
-        if (!signer) {
-            throw new NoSignerError();
-        } else if (!signer.provider) {
-            throw new NoProviderError();
-        }
-
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
-        const shopContract: Shop = Shop__factory.connect(this.web3.getShopAddress(), signer);
-        const account: string = await signer.getAddress();
-        return await shopContract.getShopsOfAccount(account, BigNumber.from(from), BigNumber.from(to));
-    }
-
-    public async getShopsCount(): Promise<BigNumber> {
-        const signer = this.web3.getConnectedSigner();
-        if (!signer) {
-            throw new NoSignerError();
-        } else if (!signer.provider) {
-            throw new NoProviderError();
-        }
-
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
-        const shopContract: Shop = Shop__factory.connect(this.web3.getShopAddress(), signer);
-        const account: string = await signer.getAddress();
-        return await shopContract.getShopsCountOfAccount(account);
-    }
-
-    /**
      * 상점의 정보를 제공한다.
      * @param shopId
      * @return {Promise<ShopData>} 상점의 정보
@@ -187,6 +113,9 @@ export class ShopMethods extends ClientCore implements IShopMethods, IClientHttp
 
         const shopContract: Shop = Shop__factory.connect(this.web3.getShopAddress(), provider);
         const shopInfo = await shopContract.shopOf(shopId);
+        const settledAmount = shopInfo.usedAmount.gt(shopInfo.providedAmount)
+            ? shopInfo.usedAmount.sub(shopInfo.providedAmount)
+            : BigNumber.from(0);
         return {
             shopId: shopInfo.shopId,
             name: shopInfo.name,
@@ -195,171 +124,28 @@ export class ShopMethods extends ClientCore implements IShopMethods, IClientHttp
             delegator: shopInfo.delegator,
             providedAmount: shopInfo.providedAmount,
             usedAmount: shopInfo.usedAmount,
-            settledAmount: shopInfo.settledAmount,
-            withdrawnAmount: shopInfo.withdrawnAmount,
-            status: shopInfo.status,
-            withdrawAmount: shopInfo.withdrawData.amount,
-            withdrawStatus: shopInfo.withdrawData.status
+            settledAmount,
+            refundedAmount: shopInfo.refundedAmount,
+            status: shopInfo.status
         };
     }
 
-    /**
-     * 상점주가 정산금 출금 신청을 오픈한다.
-     * @param shopId
-     * @param amount
-     * @return {AsyncGenerator<OpenWithdrawalShopStepValue>}
-     */
-    public async *openWithdrawal(shopId: BytesLike, amount: BigNumberish): AsyncGenerator<OpenWithdrawalShopStepValue> {
-        const signer = this.web3.getConnectedSigner();
-        if (!signer) {
-            throw new NoSignerError();
-        } else if (!signer.provider) {
-            throw new NoProviderError();
-        }
+    // endregion
 
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
+    // region Add
+
+    public async isAvailableId(shopId: BytesLike): Promise<boolean> {
+        const provider = this.web3.getProvider() as Provider;
+        if (!provider) throw new NoProviderError();
+
+        const network = getNetwork((await provider.getNetwork()).chainId);
         const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworkArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
 
-        const shopContract: Shop = Shop__factory.connect(this.web3.getShopAddress(), signer);
-        let contractTx: ContractTransaction;
-        const account: string = await signer.getAddress();
-        const nonce = await shopContract.nonceOf(account);
-        const message = ContractUtils.getShopAccountMessage(shopId, account, nonce, network.chainId);
-        const signature = await ContractUtils.signMessage(signer, message);
-
-        const param = {
-            shopId,
-            account,
-            amount: amount.toString(),
-            signature
-        };
-
-        yield {
-            key: NormalSteps.PREPARED,
-            shopId,
-            account,
-            amount,
-            signature
-        };
-
-        const res = await Network.post(await this.getEndpoint("/v1/shop/withdrawal/open"), param);
-        if (res.code !== 0) {
-            throw new InternalServerError(res?.error?.message ?? "");
-        }
-
-        contractTx = (await signer.provider.getTransaction(res.data.txHash)) as ContractTransaction;
-
-        yield { key: NormalSteps.SENT, txHash: res.data.txHash, shopId };
-
-        const txReceipt = await contractTx.wait();
-
-        const log = findLog(txReceipt, shopContract.interface, "OpenedWithdrawal");
-        if (!log) {
-            throw new FailedAddShopError();
-        }
-        const parsedLog = shopContract.interface.parseLog(log);
-
-        yield {
-            key: NormalSteps.DONE,
-            shopId: parsedLog.args["shopId"],
-            amount: parsedLog.args["amount"],
-            account: parsedLog.args["account"]
-        };
-    }
-
-    /**
-     * 상점주가 정산금 출금 신청을 확인하고 닫는다.
-     * @param shopId
-     * @return {AsyncGenerator<OpenWithdrawalShopStepValue>}
-     */
-    public async *closeWithdrawal(shopId: BytesLike): AsyncGenerator<CloseWithdrawalShopStepValue> {
-        const signer = this.web3.getConnectedSigner();
-        if (!signer) {
-            throw new NoSignerError();
-        } else if (!signer.provider) {
-            throw new NoProviderError();
-        }
-
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
-        const shopContract: Shop = Shop__factory.connect(this.web3.getShopAddress(), signer);
-        const account: string = await signer.getAddress();
-        let contractTx: ContractTransaction;
-        const nonce = await shopContract.nonceOf(account);
-        const message = ContractUtils.getShopAccountMessage(shopId, account, nonce, network.chainId);
-        const signature = await ContractUtils.signMessage(signer, message);
-
-        const param = {
-            shopId,
-            account,
-            signature
-        };
-
-        yield {
-            key: NormalSteps.PREPARED,
-            shopId,
-            account,
-            signature
-        };
-
-        const res = await Network.post(await this.getEndpoint("/v1/shop/withdrawal/close"), param);
-        if (res.code !== 0) {
-            throw new InternalServerError(res?.error?.message ?? "");
-        }
-
-        contractTx = (await signer.provider.getTransaction(res.data.txHash)) as ContractTransaction;
-
-        yield { key: NormalSteps.SENT, txHash: res.data.txHash, shopId };
-
-        const txReceipt = await contractTx.wait();
-
-        const log = findLog(txReceipt, shopContract.interface, "ClosedWithdrawal");
-        if (!log) {
-            throw new FailedAddShopError();
-        }
-        const parsedLog = shopContract.interface.parseLog(log);
-
-        yield {
-            key: NormalSteps.DONE,
-            shopId: parsedLog.args["shopId"],
-            amount: parsedLog.args["amount"],
-            account: parsedLog.args["account"]
-        };
-    }
-
-    public async getTaskDetail(taskId: BytesLike): Promise<ShopDetailData> {
-        const res = await Network.get(await this.getEndpoint("/v1/shop/task"), {
-            taskId: taskId.toString()
-        });
-        if (res.code !== 0 || res.data === undefined) {
-            throw new InternalServerError(res?.error?.message ?? "");
-        }
-
-        let detail: ShopDetailData;
-
-        try {
-            detail = {
-                taskId: res.data.taskId,
-                shopId: res.data.shopId,
-                name: res.data.name,
-                currency: res.data.currency,
-                status: res.data.status,
-                account: res.data.account,
-                taskStatus: res.taskStatus,
-                timestamp: res.timestamp
-            };
-        } catch (_) {
-            throw new InternalServerError("Error parsing receiving data");
-        }
-
-        return detail;
+        const shopContract: Shop = Shop__factory.connect(this.web3.getShopAddress(), provider);
+        return await shopContract.isAvailableId(shopId);
     }
 
     /**
@@ -430,6 +216,38 @@ export class ShopMethods extends ClientCore implements IShopMethods, IClientHttp
             currency: parsedLog.args["currency"],
             account: parsedLog.args["account"]
         };
+    }
+
+    // endregion
+
+    // region Update
+
+    public async getTaskDetail(taskId: BytesLike): Promise<ShopDetailData> {
+        const res = await Network.get(await this.getEndpoint("/v1/shop/task"), {
+            taskId: taskId.toString()
+        });
+        if (res.code !== 0 || res.data === undefined) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+
+        let detail: ShopDetailData;
+
+        try {
+            detail = {
+                taskId: res.data.taskId,
+                shopId: res.data.shopId,
+                name: res.data.name,
+                currency: res.data.currency,
+                status: res.data.status,
+                account: res.data.account,
+                taskStatus: res.taskStatus,
+                timestamp: res.timestamp
+            };
+        } catch (_) {
+            throw new InternalServerError("Error parsing receiving data");
+        }
+
+        return detail;
     }
 
     public async *approveUpdate(
@@ -607,82 +425,138 @@ export class ShopMethods extends ClientCore implements IShopMethods, IClientHttp
         } else return undefined;
     }
 
+    // endregion
+
+    // region Refund
     /**
-     * 상점의 로얄티 제공/사용 거래내역을 제공한다
-     * @param shopId
-     * @param limit
-     * @param skip
-     * @param sortDirection
-     * @param sortBy
-     * @return {Promise<any>}
+     * 반환받을 수 있는 정산금을 제공한다. 금액과 토큰의 량을 제공한다
+     * @param shopId 상점의 아이디
+     * @return {Promise<ShopRefundableData>} 반환가능금액
      */
-    public async getProvideAndUseTradeHistory(
-        shopId: BytesLike,
-        { limit, skip, sortDirection, sortBy }: QueryOption = {
-            limit: 10,
-            skip: 0,
-            sortDirection: SortDirection.DESC,
-            sortBy: SortByBlock.BLOCK_NUMBER
+    public async getRefundableAmount(shopId: BytesLike): Promise<ShopRefundableData> {
+        const res = await Network.get(await this.getEndpoint(`/v1/shop/refundable/${shopId}`));
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
         }
-    ): Promise<any> {
-        const query = QueryShopTradeHistory;
-        const where = { shopId: shopId, pageType: ShopPageType.PROVIDE_USE };
-        const params = { where, limit, skip, direction: sortDirection, sortBy };
-        const name = "shop trade history";
-        return await this.graphql.request({ query, params, name });
+        return {
+            refundableAmount: BigNumber.from(res.data.refundableAmount),
+            refundableToken: BigNumber.from(res.data.refundableToken)
+        };
     }
 
     /**
-     상점의 거래내역들 중 정산금의 인출 거래내역을 제공한다
+     * 상점의 정산금을 반환한다
      * @param shopId
-     * @param limit
-     * @param skip
-     * @param sortDirection
-     * @param sortBy
-     * @return {Promise<any>}
+     * @param amount
+     * @return {AsyncGenerator<RefundShopStepValue>}
      */
-    public async getWithdrawTradeHistory(
-        shopId: BytesLike,
-        { limit, skip, sortDirection, sortBy }: QueryOption = {
-            limit: 10,
-            skip: 0,
-            sortDirection: SortDirection.DESC,
-            sortBy: SortByBlock.BLOCK_NUMBER
+    public async *refund(shopId: BytesLike, amount: BigNumber): AsyncGenerator<RefundShopStepValue> {
+        const signer = this.web3.getConnectedSigner();
+        if (!signer) {
+            throw new NoSignerError();
+        } else if (!signer.provider) {
+            throw new NoProviderError();
         }
-    ): Promise<any> {
-        const query = QueryShopTradeHistory;
-        const where = { shopId: shopId, pageType: ShopPageType.WITHDRAW };
-        const params = { where, limit, skip, direction: sortDirection, sortBy };
-        const name = "shop trade history";
-        return await this.graphql.request({ query, params, name });
-    }
 
-    public async getEstimatedProvideHistory(shopId: BytesLike): Promise<any[]> {
+        const network = getNetwork((await signer.provider.getNetwork()).chainId);
+        const networkName = network.name as SupportedNetwork;
+        if (!SupportedNetworkArray.includes(networkName)) {
+            throw new UnsupportedNetworkError(networkName);
+        }
+
+        const shopContract: Shop = Shop__factory.connect(this.web3.getShopAddress(), signer);
+        let contractTx: ContractTransaction;
+        const account: string = await signer.getAddress();
+        const adjustedAmount = ContractUtils.zeroGWEI(amount);
+        const nonce = await shopContract.nonceOf(account);
+        const message = ContractUtils.getShopRefundMessage(shopId, account, adjustedAmount, nonce, network.chainId);
+        const signature = await ContractUtils.signMessage(signer, message);
+
         const param = {
-            shopId: shopId.toString()
+            shopId,
+            account,
+            amount: adjustedAmount.toString(),
+            signature
         };
 
-        const res = await Network.get(await this.getEndpoint("/v1/purchase/shop/provide"), param);
+        yield {
+            key: NormalSteps.PREPARED,
+            shopId,
+            account,
+            amount: adjustedAmount,
+            signature
+        };
+
+        const res = await Network.post(await this.getEndpoint("/v1/shop/refund"), param);
         if (res.code !== 0) {
             throw new InternalServerError(res?.error?.message ?? "");
         }
 
-        return res.data;
+        contractTx = (await signer.provider.getTransaction(res.data.txHash)) as ContractTransaction;
+
+        yield { key: NormalSteps.SENT, txHash: res.data.txHash, shopId };
+
+        const txReceipt = await contractTx.wait();
+
+        const log = findLog(txReceipt, shopContract.interface, "Refunded");
+        if (!log) {
+            throw new FailedAddShopError();
+        }
+        const parsedLog = shopContract.interface.parseLog(log);
+
+        yield {
+            key: NormalSteps.DONE,
+            shopId: parsedLog.args["shopId"],
+            account: parsedLog.args["account"],
+            currency: parsedLog.args["currency"],
+            refundAmount: parsedLog.args["refundAmount"],
+            refundToken: parsedLog.args["amountToken"]
+        };
     }
 
-    public async getTotalEstimatedProvideHistory(shopId: BytesLike): Promise<any[]> {
-        const param = {
-            shopId: shopId.toString()
-        };
+    // endregion
 
-        const res = await Network.get(await this.getEndpoint("/v1/purchase/shop/provide/total"), param);
-        if (res.code !== 0) {
-            throw new InternalServerError(res?.error?.message ?? "");
+    // region List
+    public async getShops(from: number, to: number): Promise<BytesLike[]> {
+        const signer = this.web3.getConnectedSigner();
+        if (!signer) {
+            throw new NoSignerError();
+        } else if (!signer.provider) {
+            throw new NoProviderError();
         }
 
-        return res.data;
+        const network = getNetwork((await signer.provider.getNetwork()).chainId);
+        const networkName = network.name as SupportedNetwork;
+        if (!SupportedNetworkArray.includes(networkName)) {
+            throw new UnsupportedNetworkError(networkName);
+        }
+
+        const shopContract: Shop = Shop__factory.connect(this.web3.getShopAddress(), signer);
+        const account: string = await signer.getAddress();
+        return await shopContract.getShopsOfAccount(account, BigNumber.from(from), BigNumber.from(to));
     }
 
+    public async getShopsCount(): Promise<BigNumber> {
+        const signer = this.web3.getConnectedSigner();
+        if (!signer) {
+            throw new NoSignerError();
+        } else if (!signer.provider) {
+            throw new NoProviderError();
+        }
+
+        const network = getNetwork((await signer.provider.getNetwork()).chainId);
+        const networkName = network.name as SupportedNetwork;
+        if (!SupportedNetworkArray.includes(networkName)) {
+            throw new UnsupportedNetworkError(networkName);
+        }
+
+        const shopContract: Shop = Shop__factory.connect(this.web3.getShopAddress(), signer);
+        const account: string = await signer.getAddress();
+        return await shopContract.getShopsCountOfAccount(account);
+    }
+    // endregion
+
+    // region Delegate
     public async *createDelegate(shopId: BytesLike): AsyncGenerator<CreateDelegateStepValue> {
         const signer = this.web3.getConnectedSigner();
         if (!signer) {
@@ -828,4 +702,76 @@ export class ShopMethods extends ClientCore implements IShopMethods, IClientHttp
             delegator
         };
     }
+    // endregion
+
+    // region History
+    /**
+     * 사용자 지갑주소의 거래내역을 제공한다.
+     * @param shopId 사용자의 지갑주소
+     * @param pageNumber 페이지번호 1부터 시작됨
+     * @param pageSize 페이지당 항목의 갯수
+     * @param actions 수신하기를 원하는 거래의 유형들이 기록된 배열
+     */
+    public async getHistory(
+        shopId: BytesLike,
+        actions: ShopAction[],
+        pageNumber: number = 1,
+        pageSize: number = 10
+    ): Promise<any> {
+        const params = {
+            pageNumber,
+            pageSize,
+            actions: actions.join(",")
+        };
+        const res = await Network.get(await this.getEndpoint(`/v1/shop/history/${shopId}`), params);
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+        return res.data;
+    }
+    /**
+     * 상점의 로얄티 제공/사용 거래내역을 제공한다
+     * @param shopId 사용자의 지갑주소
+     * @param pageNumber 페이지번호 1부터 시작됨
+     * @param pageSize 페이지당 항목의 갯수
+     * @return {Promise<any>}
+     */
+    public async getProvideAndUseTradeHistory(
+        shopId: BytesLike,
+        pageNumber: number = 1,
+        pageSize: number = 10
+    ): Promise<any> {
+        return await this.getHistory(shopId, [ShopAction.PROVIDED, ShopAction.USED], pageNumber, pageSize);
+    }
+
+    /**
+     상점의 거래내역들 중 정산금의 인출 거래내역을 제공한다
+     @param shopId 사용자의 지갑주소
+     @param pageNumber 페이지번호 1부터 시작됨
+     @param pageSize 페이지당 항목의 갯수
+     * @return {Promise<any>}
+     */
+    public async getRefundHistory(shopId: BytesLike, pageNumber: number = 1, pageSize: number = 10): Promise<any> {
+        return await this.getHistory(shopId, [ShopAction.REFUNDED], pageNumber, pageSize);
+    }
+
+    public async getEstimatedProvideHistory(shopId: BytesLike): Promise<any[]> {
+        const res = await Network.get(await this.getEndpoint(`/v1/purchase/shop/provide/${shopId.toString()}`));
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+
+        return res.data;
+    }
+
+    public async getTotalEstimatedProvideHistory(shopId: BytesLike): Promise<any[]> {
+        const res = await Network.get(await this.getEndpoint(`/v1/purchase/shop/provide/total/${shopId.toString()}`));
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+
+        return res.data;
+    }
+
+    // endregion
 }

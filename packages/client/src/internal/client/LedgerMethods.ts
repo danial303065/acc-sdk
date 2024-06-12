@@ -34,9 +34,6 @@ import {
     DepositSteps,
     DepositStepValue,
     NormalSteps,
-    QueryOption,
-    SortByBlock,
-    SortDirection,
     UpdateAllowanceParams,
     UpdateAllowanceStepValue,
     WithdrawSteps,
@@ -45,7 +42,6 @@ import {
     ApproveNewPaymentValue,
     LoyaltyPaymentEvent,
     ApproveCancelPaymentValue,
-    LedgerPageType,
     PaymentDetailTaskStatus,
     MobileType,
     RemovePhoneInfoStepValue,
@@ -53,7 +49,8 @@ import {
     DepositViaBridgeStepValue,
     IChainInfo,
     WaiteBridgeStepValue,
-    WaiteBridgeSteps
+    WaiteBridgeSteps,
+    LedgerAction
 } from "../../interfaces";
 import {
     AmountMismatchError,
@@ -75,7 +72,6 @@ import { getNetwork } from "../../utils/Utilty";
 
 import { BigNumber } from "@ethersproject/bignumber";
 import { ContractTransaction } from "@ethersproject/contracts";
-import { QueryUserTradeHistory } from "../graphql-queries/user/history";
 import { AddressZero } from "@ethersproject/constants";
 import { BytesLike } from "@ethersproject/bytes";
 
@@ -96,6 +92,7 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
         // Object.freeze(this);
     }
 
+    // region Common
     /**
      * 릴레이 서버가 정상적인 상태인지 검사한다.
      * @return {Promise<boolean>} 이 값이 true 이면 릴레이 서버가 정상이다.
@@ -140,6 +137,18 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
         return new URL(path, newUrl);
     }
 
+    public async getNonceOfLedger(account: string): Promise<BigNumber> {
+        const res = await Network.get(await this.getEndpoint(`/v1/ledger/nonce/${account}`));
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+
+        return BigNumber.from(res.data.nonce);
+    }
+
+    // endregion
+
+    // region Balance
     /**
      * 포인트의 잔고를 리턴한다
      * @param {string} phone - 전화번호 해시
@@ -198,6 +207,9 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
         return await ledgerInstance.tokenBalanceOf(account);
     }
 
+    // endregion
+
+    // region Payment
     /**
      * 컨트랙트에 저장된 수수료 율을 리턴한다.
      */
@@ -214,6 +226,40 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
         const ledgerInstance: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), provider);
 
         return await ledgerInstance.getFee();
+    }
+
+    public async getTemporaryAccount(): Promise<string> {
+        const signer = this.web3.getConnectedSigner();
+        if (!signer) {
+            throw new NoSignerError();
+        } else if (!signer.provider) {
+            throw new NoProviderError();
+        }
+
+        const network = getNetwork((await signer.provider.getNetwork()).chainId);
+        const networkName = network.name as SupportedNetwork;
+        if (!SupportedNetworkArray.includes(networkName)) {
+            throw new UnsupportedNetworkError(networkName);
+        }
+
+        const ledgerContract: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), signer);
+
+        const account = await signer.getAddress();
+        const nonce = await ledgerContract.nonceOf(account);
+        const message = ContractUtils.getAccountMessage(account, nonce, network.chainId);
+        const signature = await ContractUtils.signMessage(signer, message);
+
+        const param = {
+            account,
+            signature
+        };
+
+        const res = await Network.post(await this.getEndpoint("/v1/payment/account/temporary"), param);
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+
+        return res.data.temporaryAccount;
     }
 
     public async getPaymentDetail(paymentId: BytesLike): Promise<PaymentDetailData> {
@@ -564,6 +610,9 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
         return undefined;
     }
 
+    // endregion
+
+    // region Deposit & Withdrawal
     /**
      * 토큰을 예치합니다.
      * @param {BigNumber} amount 금액
@@ -714,71 +763,11 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
         };
     }
 
+    // endregion
+
+    // region Change
     /**
-     * 포인트 를 토큰 으로 변환
-     * @return {AsyncGenerator<ExchangePointToTokenStepValue>}
-     */
-    public async *exchangePointToToken(amount: BigNumber): AsyncGenerator<ExchangePointToTokenStepValue> {
-        const signer = this.web3.getConnectedSigner();
-        if (!signer) {
-            throw new NoSignerError();
-        } else if (!signer.provider) {
-            throw new NoProviderError();
-        }
-
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
-        const ledgerContract: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), signer);
-        const account: string = await signer.getAddress();
-        const adjustedAmount = ContractUtils.zeroGWEI(amount);
-        let contractTx: ContractTransaction;
-        const nonce = await ledgerContract.nonceOf(account);
-        const message = ContractUtils.getChangePointToTokenMessage(account, adjustedAmount, nonce, network.chainId);
-        const signature = await ContractUtils.signMessage(signer, message);
-
-        yield { key: NormalSteps.PREPARED, account, amount: adjustedAmount, signature };
-
-        const param = {
-            account,
-            amount: adjustedAmount.toString(),
-            signature
-        };
-        const res = await Network.post(await this.getEndpoint("/v1/ledger/exchangePointToToken"), param);
-        if (res.code !== 0) {
-            throw new InternalServerError(res?.error?.message ?? "");
-        }
-
-        contractTx = (await signer.provider.getTransaction(res.data.txHash)) as ContractTransaction;
-
-        yield { key: NormalSteps.SENT, txHash: res.data.txHash };
-        const txReceipt = await contractTx.wait();
-
-        const exchangerContract: LoyaltyExchanger = LoyaltyExchanger__factory.connect(
-            this.web3.getLedgerAddress(),
-            signer
-        );
-        const log = findLog(txReceipt, exchangerContract.interface, "ChangedPointToToken");
-        if (!log) {
-            throw new FailedPayTokenError();
-        }
-        const parsedLog = exchangerContract.interface.parseLog(log);
-
-        yield {
-            key: NormalSteps.DONE,
-            account: parsedLog.args["account"],
-            amountToken: parsedLog.args["amountToken"],
-            amountPoint: parsedLog.args["amountPoint"],
-            balanceToken: parsedLog.args["balanceToken"],
-            balancePoint: parsedLog.args["balancePoint"]
-        };
-    }
-
-    /**
-     * 사용가능한 포인트로 변환한다.
+     * 전화번호로 적립된 포인트를 사용가능한 지갑주소로 적립된 포인트로 변환한다.
      * @param phone 전화번호
      * @return {AsyncGenerator<ChangeToPayablePointStepValue>}
      */
@@ -854,7 +843,73 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
     }
 
     /**
-     * 사용자의 내역을 제공한다.
+     * 포인트를 토큰으로 변환
+     * @return {AsyncGenerator<ExchangePointToTokenStepValue>}
+     */
+    public async *exchangePointToToken(amount: BigNumber): AsyncGenerator<ExchangePointToTokenStepValue> {
+        const signer = this.web3.getConnectedSigner();
+        if (!signer) {
+            throw new NoSignerError();
+        } else if (!signer.provider) {
+            throw new NoProviderError();
+        }
+
+        const network = getNetwork((await signer.provider.getNetwork()).chainId);
+        const networkName = network.name as SupportedNetwork;
+        if (!SupportedNetworkArray.includes(networkName)) {
+            throw new UnsupportedNetworkError(networkName);
+        }
+
+        const ledgerContract: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), signer);
+        const account: string = await signer.getAddress();
+        const adjustedAmount = ContractUtils.zeroGWEI(amount);
+        let contractTx: ContractTransaction;
+        const nonce = await ledgerContract.nonceOf(account);
+        const message = ContractUtils.getChangePointToTokenMessage(account, adjustedAmount, nonce, network.chainId);
+        const signature = await ContractUtils.signMessage(signer, message);
+
+        yield { key: NormalSteps.PREPARED, account, amount: adjustedAmount, signature };
+
+        const param = {
+            account,
+            amount: adjustedAmount.toString(),
+            signature
+        };
+        const res = await Network.post(await this.getEndpoint("/v1/ledger/exchangePointToToken"), param);
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+
+        contractTx = (await signer.provider.getTransaction(res.data.txHash)) as ContractTransaction;
+
+        yield { key: NormalSteps.SENT, txHash: res.data.txHash };
+        const txReceipt = await contractTx.wait();
+
+        const exchangerContract: LoyaltyExchanger = LoyaltyExchanger__factory.connect(
+            this.web3.getLedgerAddress(),
+            signer
+        );
+        const log = findLog(txReceipt, exchangerContract.interface, "ChangedPointToToken");
+        if (!log) {
+            throw new FailedPayTokenError();
+        }
+        const parsedLog = exchangerContract.interface.parseLog(log);
+
+        yield {
+            key: NormalSteps.DONE,
+            account: parsedLog.args["account"],
+            amountToken: parsedLog.args["amountToken"],
+            amountPoint: parsedLog.args["amountPoint"],
+            balanceToken: parsedLog.args["balanceToken"],
+            balancePoint: parsedLog.args["balancePoint"]
+        };
+    }
+
+    // endregion
+
+    // region Mobile
+    /**
+     * 모바일의 정보를 등록한다
      * @param token
      * @param language
      * @param os
@@ -890,7 +945,7 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
     }
 
     /**
-     * 사용가능한 포인트로 변환한다.
+     * 등록된 모바일의 정보를 폐기한다
      * @return {AsyncGenerator<RemovePhoneInfoStepValue>}
      */
     public async *removePhoneInfo(): AsyncGenerator<RemovePhoneInfoStepValue> {
@@ -941,189 +996,9 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
             account
         };
     }
+    // endregion
 
-    public async getEstimatedSaveHistory(account: string): Promise<any[]> {
-        const param = {
-            account
-        };
-
-        const res = await Network.get(await this.getEndpoint("/v1/purchase/user/provide"), param);
-        if (res.code !== 0) {
-            throw new InternalServerError(res?.error?.message ?? "");
-        }
-
-        return res.data;
-    }
-
-    public async getTotalEstimatedSaveHistory(account: string): Promise<any[]> {
-        const param = {
-            account
-        };
-
-        const res = await Network.get(await this.getEndpoint("/v1/purchase/user/provide/total"), param);
-        if (res.code !== 0) {
-            throw new InternalServerError(res?.error?.message ?? "");
-        }
-
-        return res.data;
-    }
-
-    public async getTemporaryAccount(): Promise<string> {
-        const signer = this.web3.getConnectedSigner();
-        if (!signer) {
-            throw new NoSignerError();
-        } else if (!signer.provider) {
-            throw new NoProviderError();
-        }
-
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
-        const ledgerContract: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), signer);
-
-        const account = await signer.getAddress();
-        const nonce = await ledgerContract.nonceOf(account);
-        const message = ContractUtils.getAccountMessage(account, nonce, network.chainId);
-        const signature = await ContractUtils.signMessage(signer, message);
-
-        const param = {
-            account,
-            signature
-        };
-
-        const res = await Network.post(await this.getEndpoint("/v1/payment/account/temporary"), param);
-        if (res.code !== 0) {
-            throw new InternalServerError(res?.error?.message ?? "");
-        }
-
-        return res.data.temporaryAccount;
-    }
-
-    public async getNonceOfMainChainToken(account: string): Promise<BigNumber> {
-        const res = await Network.get(await this.getEndpoint(`/v1/token/main/nonce/${account}`));
-        if (res.code !== 0) {
-            throw new InternalServerError(res?.error?.message ?? "");
-        }
-
-        return BigNumber.from(res.data.nonce);
-    }
-
-    public async getNonceOfSideChainToken(account: string): Promise<BigNumber> {
-        const res = await Network.get(await this.getEndpoint(`/v1/token/side/nonce/${account}`));
-        if (res.code !== 0) {
-            throw new InternalServerError(res?.error?.message ?? "");
-        }
-
-        return BigNumber.from(res.data.nonce);
-    }
-
-    public async getNonceOfLedger(account: string): Promise<BigNumber> {
-        const res = await Network.get(await this.getEndpoint(`/v1/ledger/nonce/${account}`));
-        if (res.code !== 0) {
-            throw new InternalServerError(res?.error?.message ?? "");
-        }
-
-        return BigNumber.from(res.data.nonce);
-    }
-
-    public async getChainInfoOfMainChain(): Promise<IChainInfo> {
-        if (this.mainChainInfo !== undefined) return this.mainChainInfo;
-        const res = await Network.get(await this.getEndpoint(`/v1/chain/main/info`));
-        if (res.code !== 0) {
-            throw new InternalServerError(res?.error?.message ?? "");
-        }
-        this.mainChainInfo = {
-            url: res.data.url,
-            network: {
-                name: res.data.network.name,
-                chainId: res.data.network.chainId,
-                ensAddress: res.data.network.ensAddress,
-                transferFee: BigNumber.from(res.data.network.transferFee),
-                bridgeFee: BigNumber.from(res.data.network.bridgeFee)
-            },
-            contract: {
-                token: res.data.contract.token,
-                chainBridge: res.data.contract.chainBridge,
-                loyaltyBridge: res.data.contract.loyaltyBridge
-            }
-        };
-
-        return this.mainChainInfo;
-    }
-
-    public async getChainInfoOfSideChain(): Promise<IChainInfo> {
-        if (this.sideChainInfo !== undefined) return this.sideChainInfo;
-        const res = await Network.get(await this.getEndpoint(`/v1/chain/side/info`));
-        if (res.code !== 0) {
-            throw new InternalServerError(res?.error?.message ?? "");
-        }
-        this.sideChainInfo = {
-            url: res.data.url,
-            network: {
-                name: res.data.network.name,
-                chainId: res.data.network.chainId,
-                ensAddress: res.data.network.ensAddress,
-                transferFee: BigNumber.from(res.data.network.transferFee),
-                bridgeFee: BigNumber.from(res.data.network.bridgeFee)
-            },
-            contract: {
-                token: res.data.contract.token,
-                chainBridge: res.data.contract.chainBridge,
-                loyaltyBridge: res.data.contract.loyaltyBridge
-            }
-        };
-        return this.sideChainInfo;
-    }
-
-    public async getChainIdOfMainChain(): Promise<number> {
-        const chainInfo = await this.getChainInfoOfMainChain();
-        return Number(chainInfo.network.chainId);
-    }
-
-    public async getChainIdOfSideChain(): Promise<number> {
-        const chainInfo = await this.getChainInfoOfSideChain();
-        return Number(chainInfo.network.chainId);
-    }
-
-    public async getProviderOfMainChain(): Promise<JsonRpcProvider> {
-        const chainInfo = await this.getChainInfoOfMainChain();
-        const url = new URL(chainInfo.url);
-        return new JsonRpcProvider(url.href, {
-            name: chainInfo.network.name,
-            chainId: chainInfo.network.chainId,
-            ensAddress: chainInfo.network.ensAddress
-        });
-    }
-
-    public async getProviderOfSideChain(): Promise<JsonRpcProvider> {
-        const chainInfo = await this.getChainInfoOfSideChain();
-        const url = new URL(chainInfo.url);
-        return new JsonRpcProvider(url.href, {
-            name: chainInfo.network.name,
-            chainId: chainInfo.network.chainId,
-            ensAddress: chainInfo.network.ensAddress
-        });
-    }
-
-    public async getMainChainBalance(account: string): Promise<BigNumber> {
-        const res = await Network.get(await this.getEndpoint(`/v1/token/main/balance/${account}`));
-        if (res.code !== 0) {
-            throw new InternalServerError(res?.error?.message ?? "");
-        }
-        return BigNumber.from(res.data.balance);
-    }
-
-    public async getSideChainBalance(account: string): Promise<BigNumber> {
-        const res = await Network.get(await this.getEndpoint(`/v1/token/side/balance/${account}`));
-        if (res.code !== 0) {
-            throw new InternalServerError(res?.error?.message ?? "");
-        }
-        return BigNumber.from(res.data.balance);
-    }
-
+    // region Transfer
     /**
      * 토큰을 다른 주소로 전송한다.
      * @param to 이체할 주소
@@ -1206,7 +1081,9 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
             signature
         };
     }
+    // endregion
 
+    // region Deposit & Withdrawal via Bridge
     /**
      * 토큰을 브릿지를 경유해서 입금한다
      * @param amount 금액
@@ -1261,7 +1138,7 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
             depositId: res.data.depositId,
             txHash: res.data.txHash
         };
-
+        console.log(`res.data.txHash: ${res.data.txHash}`);
         const provider = await this.getProviderOfMainChain();
 
         const contractTx = (await provider.getTransaction(res.data.txHash)) as ContractTransaction;
@@ -1460,6 +1337,92 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
         }
         yield { key: WaiteBridgeSteps.DONE };
     }
+    // endregion
+
+    // region Main Chain
+
+    /**
+     * 메인체인의 정보를 제공한다.
+     */
+    public async getChainInfoOfMainChain(): Promise<IChainInfo> {
+        if (this.mainChainInfo !== undefined) return this.mainChainInfo;
+        const res = await Network.get(await this.getEndpoint(`/v1/chain/main/info`));
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+        this.mainChainInfo = {
+            url: res.data.url,
+            network: {
+                name: res.data.network.name,
+                chainId: res.data.network.chainId,
+                ensAddress: res.data.network.ensAddress,
+                transferFee: BigNumber.from(res.data.network.transferFee),
+                bridgeFee: BigNumber.from(res.data.network.bridgeFee)
+            },
+            contract: {
+                token: res.data.contract.token,
+                chainBridge: res.data.contract.chainBridge,
+                loyaltyBridge: res.data.contract.loyaltyBridge
+            }
+        };
+
+        return this.mainChainInfo;
+    }
+
+    /**
+     * 메인체인의 체인아이디를 제공한다.
+     */
+    public async getChainIdOfMainChain(): Promise<number> {
+        const chainInfo = await this.getChainInfoOfMainChain();
+        return Number(chainInfo.network.chainId);
+    }
+
+    /**
+     * 메인체인의 Provider를 제공한다.
+     */
+    public async getProviderOfMainChain(): Promise<JsonRpcProvider> {
+        const chainInfo = await this.getChainInfoOfMainChain();
+        const url = new URL(chainInfo.url);
+        return new JsonRpcProvider(url.href, {
+            name: chainInfo.network.name,
+            chainId: chainInfo.network.chainId,
+            ensAddress: chainInfo.network.ensAddress
+        });
+    }
+
+    /**
+     * 메인체인의 토큰잔고를 제공한다.
+     */
+    public async getMainChainBalance(account: string): Promise<BigNumber> {
+        const res = await Network.get(await this.getEndpoint(`/v1/token/main/balance/${account}`));
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+        return BigNumber.from(res.data.balance);
+    }
+
+    /**
+     * 메인체인의 토큰의 Nonce를 제공한다.
+     */
+    public async getNonceOfMainChainToken(account: string): Promise<BigNumber> {
+        const res = await Network.get(await this.getEndpoint(`/v1/token/main/nonce/${account}`));
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+
+        return BigNumber.from(res.data.nonce);
+    }
+
+    /**
+     * 메인체인의 토큰잔고를 제공한다. getMainChainBalance 와 동일하다
+     */
+    public async getBalanceOfMainChainToken(account: string): Promise<BigNumber> {
+        const res = await Network.get(await this.getEndpoint(`/v1/token/main/balance/${account}`));
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+        return BigNumber.from(res.data.balance);
+    }
 
     /**
      * 메인체인에서 토큰을 다른 주소로 전송한다.
@@ -1533,6 +1496,92 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
             amount: adjustedAmount,
             signature
         };
+    }
+
+    // endregion
+
+    // region Side Chain
+
+    /**
+     * 사이드체인의 정보를 제공한다.
+     */
+    public async getChainInfoOfSideChain(): Promise<IChainInfo> {
+        if (this.sideChainInfo !== undefined) return this.sideChainInfo;
+        const res = await Network.get(await this.getEndpoint(`/v1/chain/side/info`));
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+        this.sideChainInfo = {
+            url: res.data.url,
+            network: {
+                name: res.data.network.name,
+                chainId: res.data.network.chainId,
+                ensAddress: res.data.network.ensAddress,
+                transferFee: BigNumber.from(res.data.network.transferFee),
+                bridgeFee: BigNumber.from(res.data.network.bridgeFee)
+            },
+            contract: {
+                token: res.data.contract.token,
+                chainBridge: res.data.contract.chainBridge,
+                loyaltyBridge: res.data.contract.loyaltyBridge
+            }
+        };
+        return this.sideChainInfo;
+    }
+
+    /**
+     * 사이드체인의 체인아이디를 제공한다.
+     */
+    public async getChainIdOfSideChain(): Promise<number> {
+        const chainInfo = await this.getChainInfoOfSideChain();
+        return Number(chainInfo.network.chainId);
+    }
+
+    /**
+     * 사이드체인의 Provider 를 제공한다.
+     */
+    public async getProviderOfSideChain(): Promise<JsonRpcProvider> {
+        const chainInfo = await this.getChainInfoOfSideChain();
+        const url = new URL(chainInfo.url);
+        return new JsonRpcProvider(url.href, {
+            name: chainInfo.network.name,
+            chainId: chainInfo.network.chainId,
+            ensAddress: chainInfo.network.ensAddress
+        });
+    }
+
+    /**
+     * 사이드체인의 토큰 잔고를 제공한다.
+     */
+    public async getSideChainBalance(account: string): Promise<BigNumber> {
+        const res = await Network.get(await this.getEndpoint(`/v1/token/side/balance/${account}`));
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+        return BigNumber.from(res.data.balance);
+    }
+
+    /**
+     * 사이드체인의 토큰의 Nonce 를 제공한다.
+     */
+    public async getNonceOfSideChainToken(account: string): Promise<BigNumber> {
+        const res = await Network.get(await this.getEndpoint(`/v1/token/side/nonce/${account}`));
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+
+        return BigNumber.from(res.data.nonce);
+    }
+
+    /**
+     * 사이드체인의 토큰 잔고를 제공한다. getSideChainBalance 와 동일하다
+     */
+    public async getBalanceOfSideChainToken(account: string): Promise<BigNumber> {
+        const res = await Network.get(await this.getEndpoint(`/v1/token/side/balance/${account}`));
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+        return BigNumber.from(res.data.balance);
     }
 
     /**
@@ -1609,87 +1658,123 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
         };
     }
 
-    // region History
+    // endregion
+
+    // region History of Ledger
+
+    public async getEstimatedSaveHistory(account: string): Promise<any[]> {
+        const res = await Network.get(await this.getEndpoint(`/v1/purchase/user/provide/${account}`));
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+
+        return res.data;
+    }
+
+    public async getTotalEstimatedSaveHistory(account: string): Promise<any[]> {
+        const res = await Network.get(await this.getEndpoint(`/v1/purchase/user/provide/total/${account}`));
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+
+        return res.data;
+    }
+
+    /**
+     * 사용자 지갑주소의 거래내역을 제공한다.
+     * @param account 사용자의 지갑주소
+     * @param pageNumber 페이지번호 1부터 시작됨
+     * @param pageSize 페이지당 항목의 갯수
+     * @param actions 수신하기를 원하는 거래의 유형들이 기록된 배열
+     */
+    public async getAccountHistory(
+        account: string,
+        actions: LedgerAction[],
+        pageNumber: number = 1,
+        pageSize: number = 10
+    ): Promise<any> {
+        const params = {
+            pageNumber,
+            pageSize,
+            actions: actions.join(",")
+        };
+        const res = await Network.get(await this.getEndpoint(`/v1/ledger/history/account/${account}`), params);
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+        return res.data;
+    }
 
     /**
      * 사용자의 적립/사용 내역을 제공한다.
      * @param account 사용자의 지갑주소
-     * @param limit
-     * @param skip
-     * @param sortDirection
-     * @param sortBy
+     * @param pageNumber 페이지번호 1부터 시작됨
+     * @param pageSize 페이지당 항목의 갯수
      */
-    public async getSaveAndUseHistory(
-        account: string,
-        { limit, skip, sortDirection, sortBy }: QueryOption = {
-            limit: 10,
-            skip: 0,
-            sortDirection: SortDirection.DESC,
-            sortBy: SortByBlock.BLOCK_NUMBER
-        }
-    ): Promise<any> {
-        const query = QueryUserTradeHistory;
-        const where = { account: account, pageType: LedgerPageType.SAVE_USE };
-        const params = { where, limit, skip, direction: sortDirection, sortBy };
-        const name = "user trade history";
-        return await this.graphql.request({ query, params, name });
+    public async getSaveAndUseHistory(account: string, pageNumber: number = 1, pageSize: number = 10): Promise<any> {
+        return await this.getAccountHistory(
+            account,
+            [
+                LedgerAction.SAVED,
+                LedgerAction.USED,
+                LedgerAction.BURNED,
+                LedgerAction.CHANGED_TO_PAYABLE_POINT,
+                LedgerAction.CHANGED_TO_TOKEN,
+                LedgerAction.CHANGED_TO_POINT,
+                LedgerAction.REFUND
+            ],
+            pageNumber,
+            pageSize
+        );
     }
 
     /**
-     * 사용자의 충전/인출 내역을 제공한다.
+     * 사용자의 입출금 내역을 제공한다.
      * @param account 사용자의 지갑주소
-     * @param limit
-     * @param skip
-     * @param sortDirection
-     * @param sortBy
+     * @param pageNumber 페이지번호 1부터 시작됨
+     * @param pageSize 페이지당 항목의 갯수
      */
     public async getDepositAndWithdrawHistory(
         account: string,
-        { limit, skip, sortDirection, sortBy }: QueryOption = {
-            limit: 10,
-            skip: 0,
-            sortDirection: SortDirection.DESC,
-            sortBy: SortByBlock.BLOCK_NUMBER
-        }
+        pageNumber: number = 1,
+        pageSize: number = 10
     ): Promise<any> {
-        const query = QueryUserTradeHistory;
-        const where = { account: account, pageType: LedgerPageType.DEPOSIT_WITHDRAW };
-        const params = { where, limit, skip, direction: sortDirection, sortBy };
-        const name = "user trade history";
-        return await this.graphql.request({ query, params, name });
+        return await this.getAccountHistory(
+            account,
+            [LedgerAction.DEPOSITED, LedgerAction.WITHDRAWN],
+            pageNumber,
+            pageSize
+        );
     }
 
     /**
      * 사용자의 이체 내역을 제공한다.
      * @param account 사용자의 지갑주소
-     * @param limit
-     * @param skip
-     * @param sortDirection
-     * @param sortBy
+     * @param pageNumber 페이지번호 1부터 시작됨
+     * @param pageSize 페이지당 항목의 갯수
      */
-    public async getTransferHistory(
-        account: string,
-        { limit, skip, sortDirection, sortBy }: QueryOption = {
-            limit: 10,
-            skip: 0,
-            sortDirection: SortDirection.DESC,
-            sortBy: SortByBlock.BLOCK_NUMBER
-        }
-    ): Promise<any> {
-        const query = QueryUserTradeHistory;
-        const where = { account: account, pageType: LedgerPageType.TRANSFER };
-        const params = { where, limit, skip, direction: sortDirection, sortBy };
-        const name = "user trade history";
-        return await this.graphql.request({ query, params, name });
+    public async getTransferHistory(account: string, pageNumber: number = 1, pageSize: number = 10): Promise<any> {
+        return await this.getAccountHistory(
+            account,
+            [LedgerAction.TRANSFER_IN, LedgerAction.TRANSFER_OUT],
+            pageNumber,
+            pageSize
+        );
     }
+    // endregion
 
+    // region History of Main Chain
     /**
      * 메인체인에서 사용자의 이체 내역을 제공한다.
      * @param account 사용자의 지갑주소
      * @param pageNumber 페이지번호 1부터 시작됨
      * @param pageSize 페이지당 항목의 갯수
      */
-    public async getTransferHistoryInMainChain(account: string, pageNumber: number, pageSize: number): Promise<any> {
+    public async getTransferHistoryInMainChain(
+        account: string,
+        pageNumber: number = 1,
+        pageSize: number = 10
+    ): Promise<any> {
         const params = {
             pageNumber,
             pageSize
@@ -1700,14 +1785,20 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
         }
         return res.data;
     }
+    // endregion
 
+    // region History of Side Chain
     /**
      * 사이드체인에서 사용자의 이체 내역을 제공한다.
      * @param account 사용자의 지갑주소
      * @param pageNumber 페이지번호 1부터 시작됨
      * @param pageSize 페이지당 항목의 갯수
      */
-    public async getTransferHistoryInSideChain(account: string, pageNumber: number, pageSize: number): Promise<any> {
+    public async getTransferHistoryInSideChain(
+        account: string,
+        pageNumber: number = 1,
+        pageSize: number = 10
+    ): Promise<any> {
         const params = {
             pageNumber,
             pageSize
@@ -1718,6 +1809,5 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods, IClient
         }
         return res.data;
     }
-
     // endregion
 }

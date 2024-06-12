@@ -48,7 +48,7 @@ describe("Shop Withdrawal", () => {
         {
             shopId: "",
             name: "Shop1",
-            currency: "krw",
+            currency: "php",
             wallet: shopWallets[0]
         }
     ];
@@ -77,7 +77,7 @@ describe("Shop Withdrawal", () => {
         );
 
         for (const elem of shopData) {
-            elem.shopId = ContractUtils.getShopId(elem.wallet.address, LoyaltyNetworkID.KIOS);
+            elem.shopId = ContractUtils.getShopId(elem.wallet.address, LoyaltyNetworkID.ACC);
         }
         await NodeInfo.addShopData(contractInfo, shopData);
     });

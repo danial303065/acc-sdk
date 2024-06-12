@@ -2,7 +2,6 @@
 
 import { Signer } from "@ethersproject/abstract-signer";
 import { JsonRpcProvider, Networkish } from "@ethersproject/providers";
-import { GraphQLClient } from "graphql-request";
 
 // Context input parameters
 type Web3ContextParams = {
@@ -24,11 +23,8 @@ type Web3ContextParams = {
 type HttpContextParams = {
     relayEndpoint?: string | URL;
 };
-type GraphQLContextParams = {
-    graphqlNodes?: { url: string }[];
-};
 
-export type ContextParams = Web3ContextParams & HttpContextParams & GraphQLContextParams;
+export type ContextParams = Web3ContextParams & HttpContextParams;
 
 // Context state data
 type Web3ContextState = {
@@ -50,8 +46,5 @@ type Web3ContextState = {
 type HTTPContextState = {
     relayEndpoint?: string | URL;
 };
-type GraphQLContextState = {
-    graphql?: GraphQLClient[];
-};
 
-export type ContextState = Web3ContextState & HTTPContextState & GraphQLContextState;
+export type ContextState = Web3ContextState & HTTPContextState;

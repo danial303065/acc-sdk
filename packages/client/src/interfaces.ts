@@ -289,7 +289,7 @@ export type ApproveShopStepValue =
           account: string;
       };
 
-export type OpenWithdrawalShopStepValue =
+export type RefundShopStepValue =
     | {
           key: NormalSteps.PREPARED;
           shopId: BytesLike;
@@ -298,17 +298,14 @@ export type OpenWithdrawalShopStepValue =
           signature: BytesLike;
       }
     | { key: NormalSteps.SENT; txHash: BytesLike; shopId: BytesLike }
-    | { key: NormalSteps.DONE; shopId: BytesLike; amount: BigNumberish; account: string };
-
-export type CloseWithdrawalShopStepValue =
     | {
-          key: NormalSteps.PREPARED;
+          key: NormalSteps.DONE;
           shopId: BytesLike;
           account: string;
-          signature: BytesLike;
-      }
-    | { key: NormalSteps.SENT; txHash: BytesLike; shopId: BytesLike }
-    | { key: NormalSteps.DONE; shopId: BytesLike; amount: BigNumberish; account: string };
+          currency: string;
+          refundAmount: BigNumberish;
+          refundToken: BigNumberish;
+      };
 
 export type RemovePhoneInfoStepValue =
     | {
@@ -380,11 +377,6 @@ export enum ShopStatus {
     INACTIVE
 }
 
-export enum ShopWithdrawStatus {
-    CLOSE,
-    OPEN
-}
-
 export type ShopData = {
     shopId: BytesLike;
     name: string;
@@ -393,11 +385,14 @@ export type ShopData = {
     delegator: string;
     providedAmount: BigNumber; // 제공된 포인트 총량
     usedAmount: BigNumber; // 사용된 포인트 총량
-    settledAmount: BigNumber; // 정산된 포인트 총량
-    withdrawnAmount: BigNumber; // 정산된 포인트 총량
+    settledAmount: BigNumber; // 사용된 포인트 - 제공된 포인트
+    refundedAmount: BigNumber; // 정산이 완료된 포인트 총량
     status: ShopStatus;
-    withdrawAmount: BigNumber;
-    withdrawStatus: ShopWithdrawStatus;
+};
+
+export type ShopRefundableData = {
+    refundableAmount: BigNumber;
+    refundableToken: BigNumber;
 };
 
 export type ValidatorInfoValue = {
@@ -561,59 +556,26 @@ export type WaiteBridgeStepValue =
           key: WaiteBridgeSteps.TIMEOUT;
       };
 
-export enum SortDirection {
-    ASC = "asc",
-    DESC = "desc"
-}
-
-export type QueryOption = {
-    limit?: number;
-    skip?: number;
-    sortDirection?: SortDirection;
-    sortBy?: SortByBlock;
-};
-
-export enum SortByBlock {
-    BLOCK_NUMBER = "blockNumber",
-    BLOCK_TIMESTAMP = "blockTimestamp"
-}
-
-export enum SortBy {
-    LAST_UPDATED = "lastUpdated",
-    CREATED_AT = "createdAt"
-}
-
-export enum LedgerPageType {
-    NONE = 0,
-    SAVE_USE = 1,
-    DEPOSIT_WITHDRAW = 2,
-    TRANSFER = 3
-}
-
 export enum LedgerAction {
     NONE = 0,
     SAVED = 1,
     USED = 2,
+    BURNED,
     DEPOSITED = 11,
     WITHDRAWN = 12,
-    CHANGED = 21,
-    SETTLEMENT = 31
-}
-
-export enum ShopPageType {
-    NONE = 0,
-    PROVIDE_USE = 1,
-    SETTLEMENT = 2,
-    WITHDRAW = 3
+    CHANGED_TO_PAYABLE_POINT = 21,
+    CHANGED_TO_TOKEN = 22,
+    CHANGED_TO_POINT = 23,
+    REFUND = 31,
+    TRANSFER_IN = 41,
+    TRANSFER_OUT = 42
 }
 
 export enum ShopAction {
     NONE = 0,
     PROVIDED = 1,
     USED = 2,
-    SETTLED = 3,
-    OPEN_WITHDRAWN = 11,
-    CLOSE_WITHDRAWN = 12
+    REFUNDED = 3
 }
 
 export enum MobileType {
@@ -622,8 +584,8 @@ export enum MobileType {
 }
 
 export enum LoyaltyNetworkID {
-    KIOS,
-    PNB
+    LYT,
+    ACC
 }
 
 export interface IChainInfo {

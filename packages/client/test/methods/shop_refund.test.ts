@@ -1,21 +1,11 @@
 import { Network } from "../../src/client-common/interfaces/network";
 import { AccountIndex, NodeInfo } from "../helper/NodeInfo";
-import {
-    Amount,
-    Client,
-    Context,
-    ContractUtils,
-    NormalSteps,
-    ShopWithdrawStatus,
-    NonceManager,
-    LoyaltyNetworkID
-} from "../../src";
+import { Amount, Client, Context, ContractUtils, NormalSteps, LoyaltyNetworkID } from "../../src";
 
 import { IShopData, IUserData, IPurchaseData } from "../helper/types";
 
 import * as assert from "assert";
 
-import { BigNumber } from "@ethersproject/bignumber";
 import { Wallet } from "@ethersproject/wallet";
 
 describe("Shop Withdrawal", () => {
@@ -87,31 +77,31 @@ describe("Shop Withdrawal", () => {
         {
             shopId: "",
             name: "Shop1",
-            currency: "krw",
+            currency: "php",
             wallet: shopWallets[0]
         },
         {
             shopId: "",
             name: "Shop2",
-            currency: "krw",
+            currency: "php",
             wallet: shopWallets[1]
         },
         {
             shopId: "",
             name: "Shop3",
-            currency: "krw",
+            currency: "php",
             wallet: shopWallets[2]
         },
         {
             shopId: "",
             name: "Shop4",
-            currency: "krw",
+            currency: "php",
             wallet: shopWallets[3]
         },
         {
             shopId: "",
             name: "Shop5",
-            currency: "krw",
+            currency: "php",
             wallet: shopWallets[4]
         }
     ];
@@ -121,7 +111,7 @@ describe("Shop Withdrawal", () => {
             timestamp: 1672844400,
             amount: 10000,
             method: 0,
-            currency: "krw",
+            currency: "php",
             shopIndex: 0,
             userIndex: 0
         },
@@ -130,7 +120,7 @@ describe("Shop Withdrawal", () => {
             timestamp: 1675522800,
             amount: 10000,
             method: 0,
-            currency: "krw",
+            currency: "php",
             shopIndex: 0,
             userIndex: 0
         },
@@ -139,7 +129,7 @@ describe("Shop Withdrawal", () => {
             timestamp: 1677942000,
             amount: 10000,
             method: 0,
-            currency: "krw",
+            currency: "php",
             shopIndex: 0,
             userIndex: 0
         },
@@ -148,7 +138,7 @@ describe("Shop Withdrawal", () => {
             timestamp: 1680620400,
             amount: 10000,
             method: 0,
-            currency: "krw",
+            currency: "php",
             shopIndex: 1,
             userIndex: 0
         },
@@ -157,7 +147,7 @@ describe("Shop Withdrawal", () => {
             timestamp: 1683212400,
             amount: 10000,
             method: 0,
-            currency: "krw",
+            currency: "php",
             shopIndex: 2,
             userIndex: 0
         },
@@ -166,7 +156,7 @@ describe("Shop Withdrawal", () => {
             timestamp: 1683212400,
             amount: 10000,
             method: 0,
-            currency: "krw",
+            currency: "php",
             shopIndex: 3,
             userIndex: 0
         }
@@ -175,7 +165,6 @@ describe("Shop Withdrawal", () => {
     let shop: IShopData;
     let userIndex: number;
     let shopIndex: number;
-    let amount2: BigNumber;
 
     let client: Client;
     beforeAll(async () => {
@@ -201,7 +190,7 @@ describe("Shop Withdrawal", () => {
         );
 
         for (const elem of shopData) {
-            elem.shopId = ContractUtils.getShopId(elem.wallet.address, LoyaltyNetworkID.KIOS);
+            elem.shopId = ContractUtils.getShopId(elem.wallet.address, LoyaltyNetworkID.ACC);
         }
         await NodeInfo.addShopData(contractInfo, shopData);
     });
@@ -278,7 +267,7 @@ describe("Shop Withdrawal", () => {
             timestamp: 1672849000,
             amount: 300,
             method: 0,
-            currency: "krw",
+            currency: "php",
             shopIndex,
             userIndex
         };
@@ -357,153 +346,20 @@ describe("Shop Withdrawal", () => {
         await ContractUtils.delay(2000);
     });
 
-    it("Change point type to 'token'", async () => {
-        for await (const step of client.ledger.changeToLoyaltyToken()) {
-            switch (step.key) {
-                case NormalSteps.PREPARED:
-                    expect(step.account).toEqual(userWallets[userIndex].address);
-                    break;
-                case NormalSteps.SENT:
-                    expect(typeof step.txHash).toBe("string");
-                    expect(step.txHash).toMatch(/^0x[A-Fa-f0-9]{64}$/i);
-                    break;
-                case NormalSteps.DONE:
-                    expect(step.account).toBe(userWallets[userIndex].address);
-                    break;
-                default:
-                    throw new Error("Unexpected change loyalty step: " + JSON.stringify(step, null, 2));
-            }
-        }
-    });
-
-    it("Deposit token - Success", async () => {
-        const amount = Amount.make(20_000, 18);
-        const signer = new NonceManager(userWallets[userIndex].connect(contractInfo.provider));
-
-        let tx = await contractInfo.token
-            .connect(accounts[AccountIndex.OWNER])
-            .transfer(userWallets[userIndex].address, amount.value);
-        await tx.wait();
-
-        tx = await contractInfo.token.connect(signer).approve(contractInfo.ledger.address, amount.value);
-        await tx.wait();
-
-        tx = await contractInfo.ledger.connect(signer).deposit(amount.value);
-        await tx.wait();
-    });
-
-    it("Set User & Shop", async () => {
-        userIndex = 0;
-        shopIndex = 2;
-    });
-
-    it("Pay token", async () => {
-        const purchase: IPurchaseData = {
-            purchaseId: "P000200",
-            timestamp: 1672849000,
-            amount: 500,
-            method: 0,
-            currency: "krw",
-            shopIndex,
-            userIndex
-        };
-
-        const purchaseAmount = Amount.make(purchase.amount, 18).value;
-
-        client.useSigner(userWallets[purchase.userIndex]);
-
-        // Open New
-        let res = await Network.post(
-            new URL(contextParams.relayEndpoint + "v1/payment/new/open"),
-            {
-                purchaseId: purchase.purchaseId,
-                amount: purchaseAmount.toString(),
-                currency: purchase.currency.toLowerCase(),
-                shopId: shopData[shopIndex].shopId,
-                account: userWallets[userIndex].address
-            },
-            {
-                Authorization: NodeInfo.RELAY_ACCESS_KEY
-            }
-        );
-        assert.deepStrictEqual(res.code, 0);
-        assert.notDeepStrictEqual(res.data, undefined);
-
-        const paymentId = res.data.paymentId;
-
-        await ContractUtils.delay(3000);
-
-        // Approve New
-        client.useSigner(userWallets[userIndex]);
-        for await (const step of client.ledger.approveNewPayment(
-            paymentId,
-            purchase.purchaseId,
-            purchaseAmount,
-            purchase.currency.toLowerCase(),
-            shopData[purchase.shopIndex].shopId,
-            true
-        )) {
-            switch (step.key) {
-                case NormalSteps.PREPARED:
-                    expect(step.paymentId).toEqual(paymentId);
-                    expect(step.purchaseId).toEqual(purchase.purchaseId);
-                    expect(step.amount).toEqual(purchaseAmount);
-                    expect(step.currency).toEqual(purchase.currency.toLowerCase());
-                    expect(step.shopId).toEqual(shopData[shopIndex].shopId);
-                    expect(step.account).toEqual(userWallets[userIndex].address);
-                    expect(step.signature).toMatch(/^0x[A-Fa-f0-9]{130}$/i);
-                    break;
-                case NormalSteps.SENT:
-                    expect(step.paymentId).toEqual(paymentId);
-                    expect(step.txHash).toMatch(/^0x[A-Fa-f0-9]{64}$/i);
-                    break;
-                case NormalSteps.APPROVED:
-                    expect(step.paymentId).toEqual(paymentId);
-                    expect(step.purchaseId).toEqual(purchase.purchaseId);
-                    expect(step.currency).toEqual(purchase.currency.toLowerCase());
-                    expect(step.shopId).toEqual(shopData[shopIndex].shopId);
-                    expect(step.paidValue).toEqual(purchaseAmount);
-                    break;
-                default:
-                    throw new Error("Unexpected pay point step: " + JSON.stringify(step, null, 2));
-            }
-        }
-
-        await ContractUtils.delay(3000);
-
-        // Close New
-        res = await Network.post(
-            new URL(contextParams.relayEndpoint + "v1/payment/new/close"),
-            {
-                confirm: true,
-                paymentId
-            },
-            {
-                Authorization: NodeInfo.RELAY_ACCESS_KEY
-            }
-        );
-        assert.deepStrictEqual(res.code, 0);
-
-        await ContractUtils.delay(2000);
-    });
-
     it("Check Settlement", async () => {
-        shopIndex = 2;
+        shopIndex = 1;
         shop = shopData[shopIndex];
-        amount2 = Amount.make(400, 18).value;
-        const withdrawalAmount = await client.shop.getWithdrawableAmount(shop.shopId);
-        expect(withdrawalAmount.toString()).toEqual(amount2.toString());
-    });
-
-    it("Check Withdraw Status - Before", async () => {
-        const shopInfo = await client.shop.getShopInfo(shop.shopId);
-        expect(shopInfo.withdrawStatus).toEqual(ShopWithdrawStatus.CLOSE);
+        const expectedAmount = Amount.make(200, 18).value;
+        const { refundableAmount } = await client.shop.getRefundableAmount(shop.shopId);
+        expect(refundableAmount.toString()).toEqual(expectedAmount.toString());
     });
 
     it("Open Withdrawal", async () => {
+        shopIndex = 1;
         client.useSigner(shopWallets[shopIndex]);
+        const refundAmount = Amount.make(200, 18).value;
 
-        for await (const step of client.shop.openWithdrawal(shop.shopId, amount2)) {
+        for await (const step of client.shop.refund(shop.shopId, refundAmount)) {
             switch (step.key) {
                 case NormalSteps.PREPARED:
                     expect(step.shopId).toEqual(shop.shopId);
@@ -516,48 +372,12 @@ describe("Shop Withdrawal", () => {
                     break;
                 case NormalSteps.DONE:
                     expect(step.shopId).toEqual(shop.shopId);
-                    expect(step.amount.toString()).toEqual(amount2.toString());
+                    expect(step.refundAmount.toString()).toEqual(refundAmount.toString());
                     expect(step.account.toUpperCase()).toEqual(shopWallets[shopIndex].address.toUpperCase());
                     break;
                 default:
                     throw new Error("Unexpected open withdrawal step: " + JSON.stringify(step, null, 2));
             }
         }
-    });
-
-    it("Check Withdraw Status - Working", async () => {
-        const shopInfo = await client.shop.getShopInfo(shop.shopId);
-        expect(shopInfo.withdrawStatus).toEqual(ShopWithdrawStatus.OPEN);
-        expect(shopInfo.withdrawAmount.toString()).toEqual(amount2.toString());
-    });
-
-    it("Close Withdrawal", async () => {
-        client.useSigner(shopWallets[shopIndex]);
-
-        for await (const step of client.shop.closeWithdrawal(shop.shopId)) {
-            switch (step.key) {
-                case NormalSteps.PREPARED:
-                    expect(step.shopId).toEqual(shop.shopId);
-                    expect(step.account.toUpperCase()).toEqual(shopWallets[shopIndex].address.toUpperCase());
-                    expect(step.signature).toMatch(/^0x[A-Fa-f0-9]{130}$/i);
-                    break;
-                case NormalSteps.SENT:
-                    expect(step.shopId).toEqual(shop.shopId);
-                    expect(step.txHash).toMatch(/^0x[A-Fa-f0-9]{64}$/i);
-                    break;
-                case NormalSteps.DONE:
-                    expect(step.shopId).toEqual(shop.shopId);
-                    expect(step.amount.toString()).toEqual(amount2.toString());
-                    expect(step.account.toUpperCase()).toEqual(shopWallets[shopIndex].address.toUpperCase());
-                    break;
-                default:
-                    throw new Error("Unexpected close withdrawal step: " + JSON.stringify(step, null, 2));
-            }
-        }
-    });
-
-    it("Check Withdraw Status - After", async () => {
-        const shopInfo = await client.shop.getShopInfo(shop.shopId);
-        expect(shopInfo.withdrawStatus).toEqual(ShopWithdrawStatus.CLOSE);
     });
 });

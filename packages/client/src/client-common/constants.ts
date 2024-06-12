@@ -17,8 +17,7 @@ export const LIVE_CONTRACTS: { [K in SupportedNetwork]: NetworkDeployment } = {
         LoyaltyBridgeAddress: activeContractsList.loyalty_mainnet.LoyaltyBridge,
         network: 215110,
         web3Endpoint: "https://rpc.kios.bosagora.org/",
-        relayEndpoint: "https://relay.kios.bosagora.org/",
-        graphqlEndpoint: "https://graph.kios.bosagora.org/subgraphs/name/bosagora/dms-osx-sidemainnet"
+        relayEndpoint: "https://relay.kios.bosagora.org/"
     },
     loyalty_testnet: {
         PhoneLinkCollectionAddress: activeContractsList.loyalty_testnet.LoyaltyToken,
@@ -34,8 +33,7 @@ export const LIVE_CONTRACTS: { [K in SupportedNetwork]: NetworkDeployment } = {
         LoyaltyBridgeAddress: activeContractsList.loyalty_testnet.LoyaltyBridge,
         network: 215115,
         web3Endpoint: "https://rpc.test.kios.bosagora.org/",
-        relayEndpoint: "https://relay.test.kios.bosagora.org/",
-        graphqlEndpoint: "https://graph.test.kios.bosagora.org/subgraphs/name/bosagora/dms-osx-sidetestnet"
+        relayEndpoint: "https://relay.test.kios.bosagora.org/"
     },
     loyalty_devnet: {
         PhoneLinkCollectionAddress: activeContractsList.loyalty_devnet.PhoneLinkCollection,
@@ -51,8 +49,7 @@ export const LIVE_CONTRACTS: { [K in SupportedNetwork]: NetworkDeployment } = {
         LoyaltyBridgeAddress: activeContractsList.loyalty_devnet.LoyaltyBridge,
         network: 24680,
         web3Endpoint: "http://rpc-side.dev.lyt.bosagora.org:8545/",
-        relayEndpoint: "http://relay.dev.lyt.bosagora.org:7070/",
-        graphqlEndpoint: "http://subgraph.dev.lyt.bosagora.org:8000/subgraphs/name/bosagora/dms-osx-sidechain"
+        relayEndpoint: "http://relay.dev.lyt.bosagora.org:7070/"
     },
     acc_mainnet: {
         PhoneLinkCollectionAddress: activeContractsList.acc_mainnet.LoyaltyToken,
@@ -68,8 +65,7 @@ export const LIVE_CONTRACTS: { [K in SupportedNetwork]: NetworkDeployment } = {
         LoyaltyBridgeAddress: activeContractsList.acc_mainnet.LoyaltyBridge,
         network: 215110,
         web3Endpoint: "https://rpc.acc.bosagora.org/",
-        relayEndpoint: "https://relay.acc.bosagora.org/",
-        graphqlEndpoint: "https://graph.acc.bosagora.org/subgraphs/name/bosagora/dms-osx-sidemainnet"
+        relayEndpoint: "https://relay.acc.bosagora.org/"
     },
     acc_testnet: {
         PhoneLinkCollectionAddress: activeContractsList.acc_testnet.LoyaltyToken,
@@ -85,8 +81,7 @@ export const LIVE_CONTRACTS: { [K in SupportedNetwork]: NetworkDeployment } = {
         LoyaltyBridgeAddress: activeContractsList.acc_testnet.LoyaltyBridge,
         network: 215115,
         web3Endpoint: "https://rpc.test.acc.bosagora.org/",
-        relayEndpoint: "https://relay.test.acc.bosagora.org/",
-        graphqlEndpoint: "https://graph.test.acc.bosagora.org/subgraphs/name/bosagora/dms-osx-sidetestnet"
+        relayEndpoint: "https://relay.test.acc.bosagora.org/"
     },
     acc_devnet: {
         PhoneLinkCollectionAddress: activeContractsList.acc_devnet.PhoneLinkCollection,
@@ -102,8 +97,7 @@ export const LIVE_CONTRACTS: { [K in SupportedNetwork]: NetworkDeployment } = {
         LoyaltyBridgeAddress: activeContractsList.acc_devnet.LoyaltyBridge,
         network: 24680,
         web3Endpoint: "http://rpc-side.dev.acc.bosagora.org:28545/",
-        relayEndpoint: "http://relay.dev.acc.bosagora.org:27070/",
-        graphqlEndpoint: "http://subgraph.dev.acc.bosagora.org:28000/subgraphs/name/bosagora/dms-osx-sidechain"
+        relayEndpoint: "http://relay.dev.acc.bosagora.org:27070/"
     },
     localhost: {
         PhoneLinkCollectionAddress: "",
@@ -119,8 +113,7 @@ export const LIVE_CONTRACTS: { [K in SupportedNetwork]: NetworkDeployment } = {
         LoyaltyBridgeAddress: "",
         network: 24680,
         web3Endpoint: "http://localhost:8545/",
-        relayEndpoint: "http://localhost:7070/",
-        graphqlEndpoint: "http://localhost:8000/subgraphs/name/bosagora/dms-osx-devnet"
+        relayEndpoint: "http://localhost:7070/"
     }
 };
 

@@ -65,31 +65,31 @@ describe("Ledger", () => {
         {
             shopId: "",
             name: "Shop1",
-            currency: "krw",
+            currency: "php",
             wallet: shopWallets[0]
         },
         {
             shopId: "",
             name: "Shop2",
-            currency: "krw",
+            currency: "php",
             wallet: shopWallets[1]
         },
         {
             shopId: "",
             name: "Shop3",
-            currency: "krw",
+            currency: "php",
             wallet: shopWallets[2]
         },
         {
             shopId: "",
             name: "Shop4",
-            currency: "krw",
+            currency: "php",
             wallet: shopWallets[3]
         },
         {
             shopId: "",
             name: "Shop5",
-            currency: "krw",
+            currency: "php",
             wallet: shopWallets[4]
         }
     ];
@@ -99,7 +99,7 @@ describe("Ledger", () => {
             timestamp: 1672844400,
             amount: 10000000000,
             method: 0,
-            currency: "krw",
+            currency: "php",
             shopIndex: 0,
             userIndex: 0
         }
@@ -150,7 +150,7 @@ describe("Ledger", () => {
         );
 
         for (const elem of shopData) {
-            elem.shopId = ContractUtils.getShopId(elem.wallet.address, LoyaltyNetworkID.KIOS);
+            elem.shopId = ContractUtils.getShopId(elem.wallet.address, LoyaltyNetworkID.ACC);
         }
         await NodeInfo.addShopData(contractInfo, shopData);
     });

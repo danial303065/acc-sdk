@@ -40,6 +40,7 @@ import { Network } from "@ethersproject/networks";
 import { getNetwork } from "../../src/utils/Utilty";
 import { InvalidAddressError, UnsupportedNetworkError } from "dms-sdk-common-v2";
 import { isAddress } from "@ethersproject/address";
+import { BigNumber } from "@ethersproject/bignumber";
 import { AddressZero } from "@ethersproject/constants";
 
 dotenv.config({ path: "env/.env" });
@@ -48,8 +49,8 @@ export enum AccountIndex {
     DEPLOYER,
     OWNER,
     FOUNDATION,
-    SETTLEMENT,
     FEE,
+    TXFEE,
     CERTIFIER01,
     VALIDATOR01,
     VALIDATOR02,
@@ -153,22 +154,18 @@ export class NodeInfo {
             accounts.push(process.env.FOUNDATION);
         }
 
-        if (
-            process.env.SETTLEMENT !== undefined &&
-            process.env.SETTLEMENT.trim() !== "" &&
-            reg_bytes64.test(process.env.SETTLEMENT)
-        ) {
-            accounts.push(process.env.SETTLEMENT);
-        } else {
-            process.env.SETTLEMENT = Wallet.createRandom().privateKey;
-            accounts.push(process.env.SETTLEMENT);
-        }
-
         if (process.env.FEE !== undefined && process.env.FEE.trim() !== "" && reg_bytes64.test(process.env.FEE)) {
             accounts.push(process.env.FEE);
         } else {
             process.env.FEE = Wallet.createRandom().privateKey;
             accounts.push(process.env.FEE);
+        }
+
+        if (process.env.TXFEE !== undefined && process.env.TXFEE.trim() !== "" && reg_bytes64.test(process.env.TXFEE)) {
+            accounts.push(process.env.TXFEE);
+        } else {
+            process.env.TXFEE = Wallet.createRandom().privateKey;
+            accounts.push(process.env.TXFEE);
         }
 
         if (
@@ -610,48 +607,45 @@ export class NodeInfo {
     }
 
     public static async setExchangeRate(currencyRateContract: CurrencyRate, validators: Signer[]) {
-        {
-            const multiple = await currencyRateContract.multiple();
-            const height = 0;
-            const rates = [
-                {
-                    symbol: "KYT",
-                    rate: multiple.mul(150)
-                },
-                {
-                    symbol: "KRW",
-                    rate: multiple.mul(1)
-                },
-                {
-                    symbol: "USD",
-                    rate: multiple.mul(1000)
-                },
-                {
-                    symbol: "JPY",
-                    rate: multiple.mul(10)
-                },
-                {
-                    symbol: "kyt",
-                    rate: multiple.mul(150)
-                },
-                {
-                    symbol: "krw",
-                    rate: multiple.mul(1)
-                },
-                {
-                    symbol: "usd",
-                    rate: multiple.mul(1000)
-                },
-                {
-                    symbol: "jpy",
-                    rate: multiple.mul(10)
-                }
-            ];
-            const message = ContractUtils.getCurrencyMessage(height, rates, NodeInfo.CHAIN_ID);
-            const signatures = validators.map((m) => ContractUtils.signMessage(m, message));
-            const tx1 = await currencyRateContract.connect(validators[0]).set(height, rates, signatures);
-            await tx1.wait();
-        }
+        const height = 0;
+        const rates = [
+            {
+                symbol: "ACC",
+                rate: BigNumber.from(1761925042)
+            },
+            {
+                symbol: "LYT",
+                rate: BigNumber.from(1761925042)
+            },
+            {
+                symbol: "KRW",
+                rate: BigNumber.from(42553191)
+            },
+            {
+                symbol: "USD",
+                rate: BigNumber.from(58730834752)
+            },
+            {
+                symbol: "PHP",
+                rate: BigNumber.from(1000000000)
+            },
+            {
+                symbol: "krw",
+                rate: BigNumber.from(42553191)
+            },
+            {
+                symbol: "usd",
+                rate: BigNumber.from(58730834752)
+            },
+            {
+                symbol: "php",
+                rate: BigNumber.from(1000000000)
+            }
+        ];
+        const message = ContractUtils.getCurrencyMessage(height, rates, NodeInfo.CHAIN_ID);
+        const signatures = validators.map((m) => ContractUtils.signMessage(m, message));
+        const tx1 = await currencyRateContract.connect(validators[0]).set(height, rates, signatures);
+        await tx1.wait();
     }
 
     public static async transferBOA(addresses: string[]) {

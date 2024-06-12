@@ -27,6 +27,5 @@ export type NetworkDeployment = {
     LoyaltyBridgeAddress: string;
     web3Endpoint: string | URL;
     relayEndpoint: string | URL;
-    graphqlEndpoint: string | URL;
 };
 export type GenericRecord = Record<string, string | number | boolean | null | undefined>;

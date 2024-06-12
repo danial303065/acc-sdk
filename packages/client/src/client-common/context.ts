@@ -1,7 +1,6 @@
 import { ContextParams, ContextState } from "./interfaces/context";
 import { SupportedNetwork, SupportedNetworkArray } from "./interfaces/common";
 import { InvalidAddressError, UnsupportedProtocolError, UnsupportedNetworkError } from "dms-sdk-common-v2";
-import { GraphQLClient } from "graphql-request";
 import { getNetwork } from "../utils/Utilty";
 
 import { isAddress } from "@ethersproject/address";
@@ -123,26 +122,6 @@ export class Context {
         return this.state.loyaltyBridgeAddress;
     }
 
-    /**
-     * Getter for the GraphQL client
-     *
-     * @var graphql
-     *
-     * @returns {GraphQLClient[] | undefined}
-     *
-     * @public
-     */
-    get graphql(): GraphQLClient[] | undefined {
-        return this.state.graphql || defaultState.graphql;
-    }
-
-    // DEFAULT CONTEXT STATE
-    static setDefault(params: Partial<ContextParams>) {
-        if (params.signer) {
-            defaultState.signer = params.signer;
-        }
-    }
-
     static getDefault() {
         return defaultState;
     }
@@ -195,18 +174,6 @@ export class Context {
         }
     }
 
-    private static resolveGraphql(endpoints: { url: string }[]): GraphQLClient[] {
-        let clients: GraphQLClient[] = [];
-        endpoints.forEach((endpoint) => {
-            const url = new URL(endpoint.url);
-            if (!supportedProtocols.includes(url.protocol)) {
-                throw new UnsupportedProtocolError(url.protocol);
-            }
-            clients.push(new GraphQLClient(url.href));
-        });
-        return clients;
-    }
-
     /**
      * Does set and parse the given context configuration object
      *
@@ -243,8 +210,6 @@ export class Context {
             throw new Error("Missing loyalty transfer contract address");
         } else if (!contextParams.loyaltyBridgeAddress) {
             throw new Error("Missing loyalty bridge contract address");
-        } else if (!contextParams.graphqlNodes?.length) {
-            throw new Error("No graphql URL defined");
         }
 
         this.state = {
@@ -261,8 +226,7 @@ export class Context {
             loyaltyConsumerAddress: contextParams.loyaltyConsumerAddress,
             loyaltyExchangerAddress: contextParams.loyaltyExchangerAddress,
             loyaltyTransferAddress: contextParams.loyaltyTransferAddress,
-            loyaltyBridgeAddress: contextParams.loyaltyBridgeAddress,
-            graphql: Context.resolveGraphql(contextParams.graphqlNodes)
+            loyaltyBridgeAddress: contextParams.loyaltyBridgeAddress
         };
     }
 
@@ -311,9 +275,6 @@ export class Context {
         }
         if (contextParams.loyaltyBridgeAddress) {
             this.state.loyaltyBridgeAddress = contextParams.loyaltyBridgeAddress;
-        }
-        if (contextParams.graphqlNodes?.length) {
-            this.state.graphql = Context.resolveGraphql(contextParams.graphqlNodes);
         }
     }
 }
