@@ -86,8 +86,10 @@ describe("Ledger", () => {
             sender: await accounts[AccountIndex.FOUNDATION].getAddress()
         };
         const purchaseMessage = ContractUtils.getPurchasesMessage(0, [purchaseParams], NodeInfo.CHAIN_ID);
-        const signatures = validatorWallets.map((m) => ContractUtils.signMessage(m, purchaseMessage));
-        await contractInfo.loyaltyProvider.connect(validatorWallets[4]).savePurchase(0, [purchaseParams], signatures);
+        const signatures = await Promise.all(validatorWallets.map((m) => ContractUtils.signMessage(m, purchaseMessage)));
+        const proposeMessage = ContractUtils.getPurchasesProposeMessage(0, [purchaseParams], signatures, NodeInfo.CHAIN_ID);
+        const proposerSignature = await ContractUtils.signMessage(validatorWallets[0], proposeMessage);
+        await contractInfo.loyaltyProvider.connect(validatorWallets[4]).savePurchase(0, [purchaseParams], signatures, proposerSignature);
 
         const balance = await client.ledger.getPointBalance(user.address);
         console.log(`balance: ${new Amount(balance).toBOAString()}`);
