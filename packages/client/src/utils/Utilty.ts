@@ -1,7 +1,7 @@
 import { getNetwork as ethersGetNetwork, Networkish } from "@ethersproject/providers";
 import { Network } from "@ethersproject/networks";
 import { ADDITIONAL_NETWORKS } from "../client-common/constants";
-import { UnsupportedNetworkError } from "dms-sdk-common-v2";
+import { UnsupportedNetworkError } from "acc-sdk-common-v2";
 
 export function getNetwork(networkish: Networkish): Network {
     let network: Network | undefined;

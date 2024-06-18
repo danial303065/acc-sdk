@@ -1,6 +1,6 @@
 import { ContextParams, ContextState } from "./interfaces/context";
 import { SupportedNetwork, SupportedNetworkArray } from "./interfaces/common";
-import { InvalidAddressError, UnsupportedProtocolError, UnsupportedNetworkError } from "dms-sdk-common-v2";
+import { InvalidAddressError, UnsupportedProtocolError, UnsupportedNetworkError } from "acc-sdk-common-v2";
 import { getNetwork } from "../utils/Utilty";
 
 import { isAddress } from "@ethersproject/address";

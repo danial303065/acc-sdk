@@ -1,8 +1,8 @@
 {
-  "name": "dms-osx",
+  "name": "acc-osx",
   "version": "1.0.0",
   "description": "JS SDK for decentralized point system",
-  "repository": "https://github.com/bosagora/dms-sdk",
+  "repository": "https://github.com/acc-coin/acc-sdk",
   "author": "BOSagora Foundation",
   "license": "AGPL-3.0-or-later",
   "private": true,

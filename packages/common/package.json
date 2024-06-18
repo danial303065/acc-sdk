@@ -1,10 +1,10 @@
 {
-  "name": "dms-sdk-common-v2",
+  "name": "acc-sdk-common-v2",
   "version": "2.0.0",
   "author": "BOSagora Foundation",
   "license": "MIT",
   "main": "dist/index.js",
-  "module": "dist/dms-sdk-common-v2.esm.js",
+  "module": "dist/acc-sdk-common-v2.esm.js",
   "typings": "dist/index.d.ts",
   "files": [
     "dist"
@@ -32,11 +32,11 @@
   },
   "size-limit": [
     {
-      "path": "dist/dms-sdk-common.cjs.production.min.js",
+      "path": "dist/acc-sdk-common.cjs.production.min.js",
       "limit": "10 KB"
     },
     {
-      "path": "dist/sdk-common.esm.js",
+      "path": "dist/acc-sdk-common.esm.js",
       "limit": "10 KB"
     }
   ],
