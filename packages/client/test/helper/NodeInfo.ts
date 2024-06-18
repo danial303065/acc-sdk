@@ -33,12 +33,12 @@ import {
     LoyaltyToken__factory,
     Validator,
     Validator__factory
-} from "dms-contracts-lib-v2";
+} from "acc-contracts-lib-v2";
 import { IShopData } from "./types";
 import { Signer } from "@ethersproject/abstract-signer";
 import { Network } from "@ethersproject/networks";
 import { getNetwork } from "../../src/utils/Utilty";
-import { InvalidAddressError, UnsupportedNetworkError } from "dms-sdk-common-v2";
+import { InvalidAddressError, UnsupportedNetworkError } from "acc-sdk-common-v2";
 import { isAddress } from "@ethersproject/address";
 import { BigNumber } from "@ethersproject/bignumber";
 import { AddressZero } from "@ethersproject/constants";

@@ -1,5 +1,5 @@
 import { NetworkDeployment, SupportedNetwork } from "./interfaces/common";
-import { activeContractsList } from "dms-contracts-lib-v2";
+import { activeContractsList } from "acc-contracts-lib-v2";
 import { Network } from "@ethersproject/networks";
 
 export const LIVE_CONTRACTS: { [K in SupportedNetwork]: NetworkDeployment } = {

@@ -22,9 +22,9 @@ import {
     LoyaltyTransfer__factory,
     PhoneLinkCollection,
     PhoneLinkCollection__factory
-} from "dms-contracts-lib-v2";
+} from "acc-contracts-lib-v2";
 import { JsonRpcProvider, Provider } from "@ethersproject/providers";
-import { NoProviderError, NoSignerError, UnsupportedNetworkError, UpdateAllowanceError } from "dms-sdk-common-v2";
+import { NoProviderError, NoSignerError, UnsupportedNetworkError, UpdateAllowanceError } from "acc-sdk-common-v2";
 import { ContractUtils } from "../../utils/ContractUtils";
 import { GasPriceManager } from "../../utils/GasPriceManager";
 import { NonceManager } from "../../utils/NonceManager";

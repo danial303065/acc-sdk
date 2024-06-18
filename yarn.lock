@@ -1876,6 +1876,13 @@ abab@^2.0.0:
   resolved "https://registry.npmjs.org/abab/-/abab-2.0.6.tgz"
   integrity sha512-j2afSsaIENvHZN2B8GOpF566vZ5WVk5opAiMTvWgaQT8DkbOqsTfvNAvHoRGU2zzP8cPoqys+xHTRDWW8L+/BA==
 
+acc-contracts-lib-v2@~2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/acc-contracts-lib-v2/-/acc-contracts-lib-v2-2.1.3.tgz#51dd08fb4b9aa9f4073a041e1585da9124c3c912"
+  integrity sha512-ZUNTQdmv671GKnaymI2pZAV/RnHCNFgntLlpb3TnAcKSoE2IRS6qpOICXneoW64IS2AQmpW7UG8KL8baLxREXQ==
+  dependencies:
+    ethers "5.7.0"
+
 acorn-globals@^4.3.2:
   version "4.3.4"
   resolved "https://registry.npmjs.org/acorn-globals/-/acorn-globals-4.3.4.tgz"
@@ -2877,13 +2884,6 @@ dir-glob@^3.0.1:
   integrity sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==
   dependencies:
     path-type "^4.0.0"
-
-dms-contracts-lib-v2@~2.1.3:
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/dms-contracts-lib-v2/-/dms-contracts-lib-v2-2.1.3.tgz#bff92af26a4d09c9c1d71ac60877b5b58a55c70f"
-  integrity sha512-8CyknpGYYLYMfRWbWKDvQ6bnQnCBCgKsGwpqgbOmd/CwA0/GYrc5L7EXO3nJhRW59gDlG0/HRFpca0iefdXX5g==
-  dependencies:
-    ethers "5.7.0"
 
 doctrine@^2.1.0:
   version "2.1.0"
