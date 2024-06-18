@@ -643,8 +643,10 @@ export class NodeInfo {
             }
         ];
         const message = ContractUtils.getCurrencyMessage(height, rates, NodeInfo.CHAIN_ID);
-        const signatures = validators.map((m) => ContractUtils.signMessage(m, message));
-        const tx1 = await currencyRateContract.connect(validators[0]).set(height, rates, signatures);
+        const signatures = await Promise.all(validators.map((m) => ContractUtils.signMessage(m, message)));
+        const proposeMessage = ContractUtils.getCurrencyProposeMessage(height, rates, signatures, NodeInfo.CHAIN_ID);
+        const proposerSignature = await ContractUtils.signMessage(validators[0], proposeMessage);
+        const tx1 = await currencyRateContract.connect(validators[0]).set(height, rates, signatures, proposerSignature);
         await tx1.wait();
     }
 

@@ -462,6 +462,32 @@ export class ContractUtils {
         return arrayify(keccak256(encodedResult));
     }
 
+    public static getCurrencyProposeMessage(
+        height: BigNumberish,
+        rates: { symbol: string; rate: BigNumberish }[],
+        signatures: BytesLike[],
+        chainId: BigNumberish
+    ): Uint8Array {
+        const messages: BytesLike[] = [];
+        for (const elem of rates) {
+            const encodedData = defaultAbiCoder.encode(
+                ["string", "uint256", "uint256"],
+                [elem.symbol, elem.rate, chainId]
+            );
+            messages.push(keccak256(encodedData));
+        }
+        const signaturesMessages: BytesLike[] = [];
+        for (const elem of signatures) {
+            const encodedData = defaultAbiCoder.encode(["bytes32", "uint256"], [keccak256(elem), chainId]);
+            signaturesMessages.push(keccak256(encodedData));
+        }
+        const encodedResult = defaultAbiCoder.encode(
+            ["uint256", "uint256", "bytes32[]", "bytes32[]"],
+            [height, rates.length, messages, signaturesMessages]
+        );
+        return arrayify(keccak256(encodedResult));
+    }
+
     public static getTransferMessage(
         chainId: BigNumberish,
         tokenAddress: string,
