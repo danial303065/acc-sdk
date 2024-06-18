@@ -64,8 +64,8 @@ export const LIVE_CONTRACTS: { [K in SupportedNetwork]: NetworkDeployment } = {
         LoyaltyTransferAddress: activeContractsList.acc_mainnet.LoyaltyTransfer,
         LoyaltyBridgeAddress: activeContractsList.acc_mainnet.LoyaltyBridge,
         network: 215110,
-        web3Endpoint: "https://rpc.acc.bosagora.org/",
-        relayEndpoint: "https://relay.acc.bosagora.org/"
+        web3Endpoint: "https://rpc-side.main.acccoin.io/",
+        relayEndpoint: "https://relay.main.acccoin.io/"
     },
     acc_testnet: {
         PhoneLinkCollectionAddress: activeContractsList.acc_testnet.LoyaltyToken,
@@ -80,8 +80,8 @@ export const LIVE_CONTRACTS: { [K in SupportedNetwork]: NetworkDeployment } = {
         LoyaltyTransferAddress: activeContractsList.acc_testnet.LoyaltyTransfer,
         LoyaltyBridgeAddress: activeContractsList.acc_testnet.LoyaltyBridge,
         network: 215115,
-        web3Endpoint: "https://rpc.test.acc.bosagora.org/",
-        relayEndpoint: "https://relay.test.acc.bosagora.org/"
+        web3Endpoint: "https://rpc-side.test.acccoin.io/",
+        relayEndpoint: "https://relay.test.acccoin.io/"
     },
     acc_devnet: {
         PhoneLinkCollectionAddress: activeContractsList.acc_devnet.PhoneLinkCollection,
@@ -96,8 +96,8 @@ export const LIVE_CONTRACTS: { [K in SupportedNetwork]: NetworkDeployment } = {
         LoyaltyTransferAddress: activeContractsList.acc_devnet.LoyaltyTransfer,
         LoyaltyBridgeAddress: activeContractsList.acc_devnet.LoyaltyBridge,
         network: 24680,
-        web3Endpoint: "http://rpc-side.dev.acc.bosagora.org:28545/",
-        relayEndpoint: "http://relay.dev.acc.bosagora.org:27070/"
+        web3Endpoint: "http://rpc-side.dev.acccoin.io:28545/",
+        relayEndpoint: "http://relay.dev.acccoin.io:27070/"
     },
     localhost: {
         PhoneLinkCollectionAddress: "",

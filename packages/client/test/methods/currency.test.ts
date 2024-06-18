@@ -42,13 +42,13 @@ describe("Currency", () => {
     it("Test of Currency", async () => {
         const amount = Amount.make(100, 18).value;
         const multiple = await client.currency.getMultiple();
-        expect(await client.currency.currencyToPoint(amount, "krw")).toEqual(amount);
+        expect(await client.currency.currencyToPoint(amount, "php")).toEqual(amount);
 
-        let currencyRate = await client.currency.getRate("jpy");
-        expect(await client.currency.currencyToPoint(amount, "jpy")).toEqual(
+        let currencyRate = await client.currency.getRate("krw");
+        expect(await client.currency.currencyToPoint(amount, "krw")).toEqual(
             ContractUtils.zeroGWEI(amount.mul(currencyRate).div(multiple))
         );
-        expect(await client.currency.pointToCurrency(amount, "jpy")).toEqual(
+        expect(await client.currency.pointToCurrency(amount, "krw")).toEqual(
             ContractUtils.zeroGWEI(amount.mul(multiple).div(currencyRate))
         );
 
@@ -61,7 +61,7 @@ describe("Currency", () => {
             ContractUtils.zeroGWEI(amount.mul(tokenRate).div(multiple))
         );
 
-        expect(await client.currency.tokenToCurrency(amount, "jpy")).toEqual(
+        expect(await client.currency.tokenToCurrency(amount, "krw")).toEqual(
             ContractUtils.zeroGWEI(
                 amount
                     .mul(tokenRate)
@@ -70,7 +70,7 @@ describe("Currency", () => {
                     .div(currencyRate)
             )
         );
-        expect(await client.currency.currencyToToken(amount, "jpy")).toEqual(
+        expect(await client.currency.currencyToToken(amount, "krw")).toEqual(
             ContractUtils.zeroGWEI(
                 amount
                     .mul(currencyRate)
