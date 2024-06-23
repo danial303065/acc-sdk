@@ -45,7 +45,7 @@ describe("LoyaltyBridge", () => {
     });
 
     beforeAll(async () => {
-        client.useSigner(new Wallet(users[0].privateKey));
+        client.usePrivateKey(users[0].privateKey);
     });
 
     it("Server Health Checking", async () => {
@@ -64,7 +64,7 @@ describe("LoyaltyBridge", () => {
         const amount = Amount.make(100, 18).value;
         const oldBalanceMainChain = await client.ledger.getMainChainBalance(users[userIdx].address);
         const oldBalanceLedger = await client.ledger.getTokenBalance(users[userIdx].address);
-        client.useSigner(new Wallet(users[userIdx].privateKey, NodeInfo.createProvider()));
+        client.usePrivateKey(users[userIdx].privateKey);
         let depositId: string = "";
         for await (const step of client.ledger.depositViaBridge(amount)) {
             switch (step.key) {
@@ -133,7 +133,7 @@ describe("LoyaltyBridge", () => {
         const amount = Amount.make(100, 18).value;
         const oldBalanceMainChain = await client.ledger.getMainChainBalance(users[userIdx].address);
         const oldBalanceLedger = await client.ledger.getTokenBalance(users[userIdx].address);
-        client.useSigner(new Wallet(users[userIdx].privateKey, NodeInfo.createProvider()));
+        client.usePrivateKey(users[userIdx].privateKey);
         let depositId: string = "";
         for await (const step of client.ledger.withdrawViaBridge(amount)) {
             switch (step.key) {

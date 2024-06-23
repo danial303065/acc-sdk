@@ -7,7 +7,6 @@ import { IShop, IShopMethods } from "./interface/IShop";
 import { IPhoneLink, IPhoneLinkMethods } from "./interface/IPhoneLink";
 import { PhoneLinkMethods } from "./internal/client/PhoneLinkMethods";
 import { ShopMethods } from "./internal/client/ShopMethods";
-import { Signer } from "@ethersproject/abstract-signer";
 
 /**
  * Provider a generic client with high level methods to manage and interact
@@ -28,16 +27,12 @@ export class Client extends ClientCore implements ILedger, ICurrency, IShop, IPh
         Object.freeze(this);
     }
 
-    /** Replaces the current signer by the given one */
-    public useSigner(signer: Signer): void {
-        if (!signer) {
-            throw new Error("Empty wallet or signer");
-        }
-        this.web3.useSigner(signer);
-        this.privateLedger.web3.useSigner(signer);
-        this.privateCurrency.web3.useSigner(signer);
-        this.privateShop.web3.useSigner(signer);
-        this.privateLink.web3.useSigner(signer);
+    public usePrivateKey(privateKey: string): void {
+        this.web3.usePrivateKey(privateKey);
+        this.privateLedger.web3.usePrivateKey(privateKey);
+        this.privateCurrency.web3.usePrivateKey(privateKey);
+        this.privateShop.web3.usePrivateKey(privateKey);
+        this.privateLink.web3.usePrivateKey(privateKey);
     }
 
     public get ledger(): ILedgerMethods {

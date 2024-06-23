@@ -5,9 +5,9 @@ import { JsonRpcProvider, Networkish } from "@ethersproject/providers";
 
 // Context input parameters
 type Web3ContextParams = {
-    network: Networkish;
-    signer?: Signer;
-    web3Providers?: string | JsonRpcProvider | (string | JsonRpcProvider)[];
+    network: number;
+    privateKey?: string;
+    web3Providers?: string | (string )[];
     phoneLinkAddress?: string;
     tokenAddress?: string;
     validatorAddress?: string;
@@ -21,7 +21,7 @@ type Web3ContextParams = {
     loyaltyBridgeAddress?: string;
 };
 type HttpContextParams = {
-    relayEndpoint?: string | URL;
+    relayEndpoint?: string;
 };
 
 export type ContextParams = Web3ContextParams & HttpContextParams;

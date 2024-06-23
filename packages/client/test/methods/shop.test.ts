@@ -107,7 +107,7 @@ describe("Shop", () => {
         let detail = await client.shop.getTaskDetail(taskId);
 
         // Approve New
-        client.useSigner(shopWallet);
+        client.usePrivateKey(shopWallet.privateKey);
         for await (const step of client.shop.approveUpdate(taskId, shopData.shopId, true)) {
             switch (step.key) {
                 case NormalSteps.PREPARED:
@@ -161,7 +161,7 @@ describe("Shop", () => {
         let detail = await client.shop.getTaskDetail(taskId);
 
         // Approve New
-        client.useSigner(shopWallet);
+        client.usePrivateKey(shopWallet.privateKey);
         for await (const step of client.shop.approveStatus(taskId, shopData.shopId, true)) {
             switch (step.key) {
                 case NormalSteps.PREPARED:

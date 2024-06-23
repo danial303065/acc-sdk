@@ -80,7 +80,7 @@ export enum AccountIndex {
 }
 
 export interface IContextParams {
-    network: Networkish;
+    network: number;
     signer: Signer;
     phoneLinkAddress: string;
     tokenAddress: string;
@@ -93,9 +93,8 @@ export interface IContextParams {
     loyaltyExchangerAddress: string;
     loyaltyTransferAddress: string;
     loyaltyBridgeAddress: string;
-    web3Providers: string | JsonRpcProvider | (string | JsonRpcProvider)[];
-    relayEndpoint: string | URL;
-    graphqlNodes: { url: string }[];
+    web3Providers: string;
+    relayEndpoint: string;
 }
 
 export interface IContractInfo {
@@ -117,9 +116,8 @@ export class NodeInfo {
     public static initialAccounts: any[];
     public static RELAY_ACCESS_KEY = process.env.RELAY_ACCESS_KEY || "";
     public static NODE_END_POINT = process.env.NODE_END_POINT_FOR_TEST || "";
-    public static GRAPHQL_END_POINT = process.env.GRAPHQL_END_POINT_FOR_TEST || "";
     public static RELAY_END_POINT = process.env.RELAY_END_POINT_FOR_TEST || "";
-
+    public static NETWORK_NAME: SupportedNetwork = (process.env.NETWORK_NAME || "acc_devnet") as SupportedNetwork;
     public static CHAIN_ID: number = Number(process.env.CHAIN_ID || "24680");
 
     public static CreateInitialAccounts(): any[] {
@@ -496,34 +494,30 @@ export class NodeInfo {
     }
 
     public static createProvider(): JsonRpcProvider {
-        return this.resolveWeb3Providers(NodeInfo.NODE_END_POINT, NodeInfo.CHAIN_ID);
+        const networkName = this.NETWORK_NAME;
+        return this.resolveWeb3Providers(LIVE_CONTRACTS[networkName].web3Endpoint, LIVE_CONTRACTS[networkName].network);
     }
 
     public static getContextParams(): IContextParams {
         const accounts = NodeInfo.accounts();
-        const network = "loyalty_devnet";
+        const networkName = this.NETWORK_NAME;
 
         const contexts: IContextParams = {
-            network: LIVE_CONTRACTS[network].network,
+            network: LIVE_CONTRACTS[networkName].network,
             signer: accounts[0],
-            tokenAddress: LIVE_CONTRACTS[network].LoyaltyTokenAddress,
-            phoneLinkAddress: LIVE_CONTRACTS[network].PhoneLinkCollectionAddress,
-            validatorAddress: LIVE_CONTRACTS[network].ValidatorAddress,
-            currencyRateAddress: LIVE_CONTRACTS[network].CurrencyRateAddress,
-            shopAddress: LIVE_CONTRACTS[network].ShopAddress,
-            ledgerAddress: LIVE_CONTRACTS[network].LedgerAddress,
-            loyaltyProviderAddress: LIVE_CONTRACTS[network].LoyaltyProviderAddress,
-            loyaltyConsumerAddress: LIVE_CONTRACTS[network].LoyaltyConsumerAddress,
-            loyaltyExchangerAddress: LIVE_CONTRACTS[network].LoyaltyExchangerAddress,
-            loyaltyTransferAddress: LIVE_CONTRACTS[network].LoyaltyTransferAddress,
-            loyaltyBridgeAddress: LIVE_CONTRACTS[network].LoyaltyBridgeAddress,
-            relayEndpoint: NodeInfo.RELAY_END_POINT,
-            web3Providers: NodeInfo.createProvider(),
-            graphqlNodes: [
-                {
-                    url: NodeInfo.GRAPHQL_END_POINT
-                }
-            ]
+            tokenAddress: LIVE_CONTRACTS[networkName].LoyaltyTokenAddress,
+            phoneLinkAddress: LIVE_CONTRACTS[networkName].PhoneLinkCollectionAddress,
+            validatorAddress: LIVE_CONTRACTS[networkName].ValidatorAddress,
+            currencyRateAddress: LIVE_CONTRACTS[networkName].CurrencyRateAddress,
+            shopAddress: LIVE_CONTRACTS[networkName].ShopAddress,
+            ledgerAddress: LIVE_CONTRACTS[networkName].LedgerAddress,
+            loyaltyProviderAddress: LIVE_CONTRACTS[networkName].LoyaltyProviderAddress,
+            loyaltyConsumerAddress: LIVE_CONTRACTS[networkName].LoyaltyConsumerAddress,
+            loyaltyExchangerAddress: LIVE_CONTRACTS[networkName].LoyaltyExchangerAddress,
+            loyaltyTransferAddress: LIVE_CONTRACTS[networkName].LoyaltyTransferAddress,
+            loyaltyBridgeAddress: LIVE_CONTRACTS[networkName].LoyaltyBridgeAddress,
+            relayEndpoint: LIVE_CONTRACTS[networkName].relayEndpoint,
+            web3Providers: LIVE_CONTRACTS[networkName].web3Endpoint,
         };
 
         return contexts;
