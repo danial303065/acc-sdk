@@ -7,6 +7,7 @@ import { isAddress } from "@ethersproject/address";
 import { Network } from "@ethersproject/networks";
 import { JsonRpcProvider, Networkish } from "@ethersproject/providers";
 import { AddressZero } from "@ethersproject/constants";
+import {Wallet} from "@ethersproject/wallet";
 
 export { ContextParams } from "./interfaces/context";
 
@@ -18,7 +19,7 @@ const supportedProtocols = ["https:", "http:"];
 // State
 const defaultState: ContextState = {
     network: {
-        name: "kios_mainnet",
+        name: "acc_mainnet",
         chainId: 215110
     },
     web3Providers: [],
@@ -184,7 +185,7 @@ export class Context {
     setFull(contextParams: ContextParams): void {
         if (!contextParams.network) {
             throw new Error("Missing network");
-        } else if (!contextParams.signer) {
+        } else if (!contextParams.privateKey) {
             throw new Error("Please pass the required signer");
         } else if (!contextParams.web3Providers) {
             throw new Error("No web3 endpoints defined");
@@ -214,7 +215,7 @@ export class Context {
 
         this.state = {
             network: contextParams.network,
-            signer: contextParams.signer,
+            signer: new Wallet(contextParams.privateKey),
             web3Providers: Context.resolveWeb3Providers(contextParams.web3Providers, contextParams.network),
             tokenAddress: contextParams.tokenAddress,
             phoneLinkAddress: contextParams.phoneLinkAddress,
@@ -234,8 +235,8 @@ export class Context {
         if (contextParams.network) {
             this.state.network = contextParams.network;
         }
-        if (contextParams.signer) {
-            this.state.signer = contextParams.signer;
+        if (contextParams.privateKey) {
+            this.state.signer = new Wallet(contextParams.privateKey);
         }
         if (contextParams.web3Providers) {
             this.state.web3Providers = Context.resolveWeb3Providers(contextParams.web3Providers, this.state.network);

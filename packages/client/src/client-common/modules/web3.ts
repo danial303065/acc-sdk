@@ -151,6 +151,13 @@ export class Web3Module implements IClientWeb3Core {
         return signerMap.get(this);
     }
 
+    public usePrivateKey(privateKey: string): void {
+        let signer = new Wallet(privateKey)
+        const provider = this.getProvider();
+        if (provider !== null) signer = signer.connect(provider);
+        signerMap.set(this, signer);
+    }
+
     /** Replaces the current signer by the given one */
     public useSigner(signer: Signer): void {
         if (!signer) {

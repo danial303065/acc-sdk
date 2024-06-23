@@ -5,6 +5,7 @@ import { Contract, ContractInterface } from "@ethersproject/contracts";
 import { JsonRpcProvider } from "@ethersproject/providers";
 
 export interface IClientWeb3Core {
+    usePrivateKey: (privateKey: string) => void;
     useSigner: (signer: Signer) => void;
     shiftProvider: () => void;
     getSigner: () => Signer | null;

@@ -93,7 +93,7 @@ describe("Shop Withdrawal", () => {
 
     let delegator: string = "";
     it("Create delegator", async () => {
-        client.useSigner(shopWallets[0]);
+        client.usePrivateKey(shopWallets[0].privateKey);
         for await (const step of client.shop.createDelegate(shopData[0].shopId)) {
             switch (step.key) {
                 case NormalSteps.PREPARED:
@@ -159,7 +159,7 @@ describe("Shop Withdrawal", () => {
     });
 
     it("Temporary Account", async () => {
-        client.useSigner(userWallets[0]);
+        client.usePrivateKey(userWallets[0].privateKey);
         const temporaryAccount = await client.ledger.getTemporaryAccount();
         expect(temporaryAccount).toMatch(/^0x[A-Fa-f0-9]{40}$/i);
         console.log(temporaryAccount);

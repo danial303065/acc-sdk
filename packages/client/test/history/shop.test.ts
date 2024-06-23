@@ -157,8 +157,7 @@ describe("Integrated test of Shop", () => {
                         purchase.userIndex = userIndex;
                         purchase.purchaseId = NodeInfo.getPurchaseId();
 
-                        const userWallet = new Wallet(user.privateKey);
-                        client.useSigner(userWallet);
+                        client.usePrivateKey(user.privateKey);
 
                         // Open New
                         console.log("Pay point - Open New");
@@ -265,7 +264,7 @@ describe("Integrated test of Shop", () => {
             });
 
             it("Refund", async () => {
-                client.useSigner(new Wallet(shop.privateKey));
+                client.usePrivateKey(shop.privateKey);
 
                 for await (const step of client.shop.refund(shop.shopId, refundableAmount)) {
                     switch (step.key) {

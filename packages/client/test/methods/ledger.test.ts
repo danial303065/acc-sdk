@@ -117,7 +117,7 @@ describe("Ledger", () => {
     let phone: string;
     let phoneHash: string;
     beforeAll(async () => {
-        client.useSigner(userWallets[0]);
+        client.usePrivateKey(userWallets[0].privateKey);
         signer = client.web3.getConnectedSigner();
         userAddress = await signer.getAddress();
         phone = NodeInfo.getPhoneNumber();
@@ -169,10 +169,19 @@ describe("Ledger", () => {
             sender: await accounts[AccountIndex.FOUNDATION].getAddress()
         };
         const purchaseMessage = ContractUtils.getPurchasesMessage(0, [purchaseParams], NodeInfo.CHAIN_ID);
-        const signatures = await Promise.all(validatorWallets.map((m) => ContractUtils.signMessage(m, purchaseMessage)));
-        const proposeMessage = ContractUtils.getPurchasesProposeMessage(0, [purchaseParams], signatures, NodeInfo.CHAIN_ID);
+        const signatures = await Promise.all(
+            validatorWallets.map((m) => ContractUtils.signMessage(m, purchaseMessage))
+        );
+        const proposeMessage = ContractUtils.getPurchasesProposeMessage(
+            0,
+            [purchaseParams],
+            signatures,
+            NodeInfo.CHAIN_ID
+        );
         const proposerSignature = await ContractUtils.signMessage(validatorWallets[4], proposeMessage);
-        await contractInfo.loyaltyProvider.connect(validatorWallets[4]).savePurchase(0, [purchaseParams], signatures, proposerSignature);
+        await contractInfo.loyaltyProvider
+            .connect(validatorWallets[4])
+            .savePurchase(0, [purchaseParams], signatures, proposerSignature);
     });
 
     it("Save Purchase Data 2", async () => {
@@ -189,10 +198,19 @@ describe("Ledger", () => {
             sender: await accounts[AccountIndex.FOUNDATION].getAddress()
         };
         const purchaseMessage = ContractUtils.getPurchasesMessage(0, [purchaseParams], NodeInfo.CHAIN_ID);
-        const signatures = await Promise.all(validatorWallets.map((m) => ContractUtils.signMessage(m, purchaseMessage)));
-        const proposeMessage = ContractUtils.getPurchasesProposeMessage(0, [purchaseParams], signatures, NodeInfo.CHAIN_ID);
+        const signatures = await Promise.all(
+            validatorWallets.map((m) => ContractUtils.signMessage(m, purchaseMessage))
+        );
+        const proposeMessage = ContractUtils.getPurchasesProposeMessage(
+            0,
+            [purchaseParams],
+            signatures,
+            NodeInfo.CHAIN_ID
+        );
         const proposerSignature = await ContractUtils.signMessage(validatorWallets[4], proposeMessage);
-        await contractInfo.loyaltyProvider.connect(validatorWallets[4]).savePurchase(0, [purchaseParams], signatures, proposerSignature);
+        await contractInfo.loyaltyProvider
+            .connect(validatorWallets[4])
+            .savePurchase(0, [purchaseParams], signatures, proposerSignature);
     });
 
     const purchaseAmount = Amount.make(purchaseData[0].amount, 18).value.mul(1000);
