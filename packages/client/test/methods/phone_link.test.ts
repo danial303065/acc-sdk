@@ -7,7 +7,7 @@ describe("SDK Client", () => {
     let client: Client;
     let user = Wallet.createRandom();
     beforeAll(async () => {
-        contextParams.signer = user;
+        contextParams.privateKey = user.privateKey;
         const ctx = new Context(contextParams);
         client = new Client(ctx);
     });

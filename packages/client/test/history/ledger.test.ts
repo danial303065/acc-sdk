@@ -19,7 +19,7 @@ describe("Integrated test of Ledger", () => {
         let client: Client;
         const users: IUserData[] = JSON.parse(fs.readFileSync("test/helper/users.json", "utf8"));
         beforeAll(async () => {
-            contextParams.signer = new Wallet(users[50].privateKey);
+            contextParams.privateKey = users[50].privateKey;
             const ctx = new Context(contextParams);
             client = new Client(ctx);
         });

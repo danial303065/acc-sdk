@@ -67,7 +67,7 @@ describe("Integrated test of Shop", () => {
         shopIndex = 2;
         shop = shops[shopIndex];
         beforeAll(async () => {
-            contextParams.signer = new Wallet(shops[shopIndex].privateKey);
+            contextParams.privateKey = shops[shopIndex].privateKey;
             const ctx = new Context(contextParams);
             client = new Client(ctx);
         });
@@ -116,8 +116,15 @@ describe("Integrated test of Shop", () => {
                     };
                 });
                 const purchaseMessage = ContractUtils.getPurchasesMessage(0, purchaseParams, NodeInfo.CHAIN_ID);
-                const signatures = await Promise.all(validatorWallets.map((m) => ContractUtils.signMessage(m, purchaseMessage)));
-                const proposeMessage = ContractUtils.getPurchasesProposeMessage(0, purchaseParams, signatures, NodeInfo.CHAIN_ID);
+                const signatures = await Promise.all(
+                    validatorWallets.map((m) => ContractUtils.signMessage(m, purchaseMessage))
+                );
+                const proposeMessage = ContractUtils.getPurchasesProposeMessage(
+                    0,
+                    purchaseParams,
+                    signatures,
+                    NodeInfo.CHAIN_ID
+                );
                 const proposerSignature = await ContractUtils.signMessage(validatorWallets[4], proposeMessage);
                 await contractInfo.loyaltyProvider
                     .connect(validatorWallets[4])

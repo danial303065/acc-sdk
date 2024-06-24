@@ -1,15 +1,15 @@
-import { ContextParams, ContextState } from "./interfaces/context";
+import { ContextParams, ContextState, IContextParams } from "./interfaces/context";
 import { SupportedNetwork, SupportedNetworkArray } from "./interfaces/common";
 import { InvalidAddressError, UnsupportedProtocolError, UnsupportedNetworkError } from "acc-sdk-common-v2";
 import { getNetwork } from "../utils/Utilty";
+import { LIVE_CONTRACTS } from "./constants";
+export { ContextParams } from "./interfaces/context";
 
 import { isAddress } from "@ethersproject/address";
 import { Network } from "@ethersproject/networks";
 import { JsonRpcProvider, Networkish } from "@ethersproject/providers";
 import { AddressZero } from "@ethersproject/constants";
-import {Wallet} from "@ethersproject/wallet";
-
-export { ContextParams } from "./interfaces/context";
+import { Wallet } from "@ethersproject/wallet";
 
 const supportedProtocols = ["https:", "http:"];
 // if (typeof process !== "undefined" && process.env?.TESTING) {
@@ -277,5 +277,57 @@ export class Context {
         if (contextParams.loyaltyBridgeAddress) {
             this.state.loyaltyBridgeAddress = contextParams.loyaltyBridgeAddress;
         }
+    }
+}
+
+export class ContextBuilder {
+    public static buildContextParams(networkName: SupportedNetwork, defaultPrivateKey: string): IContextParams {
+        const contextParams: IContextParams = {
+            network: LIVE_CONTRACTS[networkName].network,
+            privateKey: defaultPrivateKey,
+            tokenAddress: LIVE_CONTRACTS[networkName].LoyaltyTokenAddress,
+            phoneLinkAddress: LIVE_CONTRACTS[networkName].PhoneLinkCollectionAddress,
+            validatorAddress: LIVE_CONTRACTS[networkName].ValidatorAddress,
+            currencyRateAddress: LIVE_CONTRACTS[networkName].CurrencyRateAddress,
+            shopAddress: LIVE_CONTRACTS[networkName].ShopAddress,
+            ledgerAddress: LIVE_CONTRACTS[networkName].LedgerAddress,
+            loyaltyProviderAddress: LIVE_CONTRACTS[networkName].LoyaltyProviderAddress,
+            loyaltyConsumerAddress: LIVE_CONTRACTS[networkName].LoyaltyConsumerAddress,
+            loyaltyExchangerAddress: LIVE_CONTRACTS[networkName].LoyaltyExchangerAddress,
+            loyaltyTransferAddress: LIVE_CONTRACTS[networkName].LoyaltyTransferAddress,
+            loyaltyBridgeAddress: LIVE_CONTRACTS[networkName].LoyaltyBridgeAddress,
+            relayEndpoint: LIVE_CONTRACTS[networkName].relayEndpoint,
+            web3Providers: LIVE_CONTRACTS[networkName].web3Endpoint
+        };
+        return contextParams;
+    }
+
+    public static buildContextParamsOfMainnet(defaultPrivateKey: string): IContextParams {
+        return ContextBuilder.buildContextParams(SupportedNetwork.ACC_MAINNET, defaultPrivateKey);
+    }
+
+    public static buildContextParamsOfTestnet(defaultPrivateKey: string): IContextParams {
+        return ContextBuilder.buildContextParams(SupportedNetwork.ACC_TESTNET, defaultPrivateKey);
+    }
+
+    public static buildContextParamsOfDevnet(defaultPrivateKey: string): IContextParams {
+        return ContextBuilder.buildContextParams(SupportedNetwork.ACC_DEVNET, defaultPrivateKey);
+    }
+
+    public static buildContext(networkName: SupportedNetwork, defaultPrivateKey: string): Context {
+        const contextParams = ContextBuilder.buildContextParams(networkName, defaultPrivateKey);
+        return new Context(contextParams);
+    }
+
+    public static buildContextOfMainnet(defaultPrivateKey: string): Context {
+        return ContextBuilder.buildContext(SupportedNetwork.ACC_MAINNET, defaultPrivateKey);
+    }
+
+    public static buildContextOfTestnet(defaultPrivateKey: string): Context {
+        return ContextBuilder.buildContext(SupportedNetwork.ACC_TESTNET, defaultPrivateKey);
+    }
+
+    public static buildContextOfDevnet(defaultPrivateKey: string): Context {
+        return ContextBuilder.buildContext(SupportedNetwork.ACC_DEVNET, defaultPrivateKey);
     }
 }

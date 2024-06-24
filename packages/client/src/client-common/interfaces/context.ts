@@ -26,6 +26,24 @@ type HttpContextParams = {
 
 export type ContextParams = Web3ContextParams & HttpContextParams;
 
+export interface IContextParams {
+    network: number;
+    privateKey: string;
+    phoneLinkAddress: string;
+    tokenAddress: string;
+    validatorAddress: string;
+    currencyRateAddress: string;
+    shopAddress: string;
+    ledgerAddress: string;
+    loyaltyProviderAddress: string;
+    loyaltyConsumerAddress: string;
+    loyaltyExchangerAddress: string;
+    loyaltyTransferAddress: string;
+    loyaltyBridgeAddress: string;
+    web3Providers: string;
+    relayEndpoint: string;
+}
+
 // Context state data
 type Web3ContextState = {
     network: Networkish;
