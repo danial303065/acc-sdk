@@ -1,7 +1,12 @@
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { Wallet } from "@ethersproject/wallet";
 import { Client, Context } from "../src";
-import { contextParamsTestnet, web3EndpointsTestnet, contextParamsDevnet, web3EndpointsDevnet } from "./helper/constants";
+import {
+    contextParamsTestnet,
+    web3EndpointsTestnet,
+    contextParamsDevnet,
+    web3EndpointsDevnet
+} from "./helper/constants";
 
 describe("Client", () => {
     describe("Client instances", () => {
@@ -90,6 +95,18 @@ describe("Client", () => {
                 .then((isUp) => {
                     expect(isUp).toEqual(true);
                 });
+        });
+    });
+
+    describe("Client relay", () => {
+        it("Should create a working client", async () => {
+            const ctx = new Context(contextParamsDevnet);
+            const client = new Client(ctx);
+
+            expect(client).toBeInstanceOf(Client);
+            console.log((await client.ledger.getEndpoint("/")).toString());
+            const relayStatus = await client.ledger.isRelayUp();
+            expect(relayStatus).toEqual(true);
         });
     });
 });
