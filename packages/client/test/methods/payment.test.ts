@@ -52,7 +52,7 @@ describe("Ledger", () => {
     let user = new Wallet(users[0].privateKey);
 
     beforeAll(async () => {
-        contextParams.signer = user;
+        contextParams.privateKey = user.privateKey;
         const ctx = new Context(contextParams);
         client = new Client(ctx);
     });

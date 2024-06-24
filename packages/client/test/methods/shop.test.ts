@@ -32,7 +32,7 @@ describe("Shop", () => {
     });
 
     beforeAll(async () => {
-        contextParams.signer = shopWallet;
+        contextParams.privateKey = shopWallet.privateKey;
         const ctx = new Context(contextParams);
         client = new Client(ctx);
     });

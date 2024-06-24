@@ -4,7 +4,9 @@ import { Wallet } from "@ethersproject/wallet";
 import {
     Amount,
     ContractUtils,
+    ContextBuilder,
     GasPriceManager,
+    IContextParams,
     LIVE_CONTRACTS,
     NonceManager,
     SupportedNetwork,
@@ -77,24 +79,6 @@ export enum AccountIndex {
     BRIDGE_VALIDATOR4,
     BRIDGE_VALIDATOR5,
     CUSTOM
-}
-
-export interface IContextParams {
-    network: number;
-    signer: Signer;
-    phoneLinkAddress: string;
-    tokenAddress: string;
-    validatorAddress: string;
-    currencyRateAddress: string;
-    shopAddress: string;
-    ledgerAddress: string;
-    loyaltyProviderAddress: string;
-    loyaltyConsumerAddress: string;
-    loyaltyExchangerAddress: string;
-    loyaltyTransferAddress: string;
-    loyaltyBridgeAddress: string;
-    web3Providers: string;
-    relayEndpoint: string;
 }
 
 export interface IContractInfo {
@@ -499,28 +483,11 @@ export class NodeInfo {
     }
 
     public static getContextParams(): IContextParams {
-        const accounts = NodeInfo.accounts();
+        if (NodeInfo.initialAccounts === undefined) {
+            NodeInfo.initialAccounts = NodeInfo.CreateInitialAccounts();
+        }
         const networkName = this.NETWORK_NAME;
-
-        const contexts: IContextParams = {
-            network: LIVE_CONTRACTS[networkName].network,
-            signer: accounts[0],
-            tokenAddress: LIVE_CONTRACTS[networkName].LoyaltyTokenAddress,
-            phoneLinkAddress: LIVE_CONTRACTS[networkName].PhoneLinkCollectionAddress,
-            validatorAddress: LIVE_CONTRACTS[networkName].ValidatorAddress,
-            currencyRateAddress: LIVE_CONTRACTS[networkName].CurrencyRateAddress,
-            shopAddress: LIVE_CONTRACTS[networkName].ShopAddress,
-            ledgerAddress: LIVE_CONTRACTS[networkName].LedgerAddress,
-            loyaltyProviderAddress: LIVE_CONTRACTS[networkName].LoyaltyProviderAddress,
-            loyaltyConsumerAddress: LIVE_CONTRACTS[networkName].LoyaltyConsumerAddress,
-            loyaltyExchangerAddress: LIVE_CONTRACTS[networkName].LoyaltyExchangerAddress,
-            loyaltyTransferAddress: LIVE_CONTRACTS[networkName].LoyaltyTransferAddress,
-            loyaltyBridgeAddress: LIVE_CONTRACTS[networkName].LoyaltyBridgeAddress,
-            relayEndpoint: LIVE_CONTRACTS[networkName].relayEndpoint,
-            web3Providers: LIVE_CONTRACTS[networkName].web3Endpoint,
-        };
-
-        return contexts;
+        return ContextBuilder.buildContextParams(networkName, NodeInfo.initialAccounts[0].secretKey);
     }
 
     public static getContractInfo(): IContractInfo {
