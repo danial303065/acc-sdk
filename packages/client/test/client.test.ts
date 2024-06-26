@@ -23,7 +23,7 @@ describe("Client", () => {
         });
 
         it("Should create a failing client", async () => {
-            contextParamsTestnet.web3Providers = web3EndpointsTestnet.failing;
+            contextParamsTestnet.web3Provider = web3EndpointsTestnet.failing;
             const context = new Context(contextParamsTestnet);
             const client = new Client(context);
 
@@ -33,24 +33,6 @@ describe("Client", () => {
 
             const web3Status = await client.web3.isUp();
             expect(web3Status).toEqual(false);
-        });
-
-        it("Should create a client, fail and shift to a working endpoint", async () => {
-            contextParamsTestnet.web3Providers = web3EndpointsTestnet.failing.concat(web3EndpointsTestnet.working);
-            const context = new Context(contextParamsTestnet);
-            const client = new Client(context);
-
-            await client.web3
-                .isUp()
-                .then((isUp) => {
-                    expect(isUp).toEqual(false);
-                    client.web3.shiftProvider();
-
-                    return client.web3.isUp();
-                })
-                .then((isUp) => {
-                    expect(isUp).toEqual(true);
-                });
         });
     });
     describe("Client instances", () => {
@@ -67,7 +49,7 @@ describe("Client", () => {
         });
 
         it("Should create a failing client", async () => {
-            contextParamsDevnet.web3Providers = web3EndpointsDevnet.failing;
+            contextParamsDevnet.web3Provider = web3EndpointsDevnet.failing;
             const context = new Context(contextParamsDevnet);
             const client = new Client(context);
 
@@ -77,24 +59,6 @@ describe("Client", () => {
 
             const web3Status = await client.web3.isUp();
             expect(web3Status).toEqual(false);
-        });
-
-        it("Should create a client, fail and shift to a working endpoint", async () => {
-            contextParamsDevnet.web3Providers = web3EndpointsDevnet.failing.concat(web3EndpointsDevnet.working);
-            const context = new Context(contextParamsDevnet);
-            const client = new Client(context);
-
-            await client.web3
-                .isUp()
-                .then((isUp) => {
-                    expect(isUp).toEqual(false);
-                    client.web3.shiftProvider();
-
-                    return client.web3.isUp();
-                })
-                .then((isUp) => {
-                    expect(isUp).toEqual(true);
-                });
         });
     });
 

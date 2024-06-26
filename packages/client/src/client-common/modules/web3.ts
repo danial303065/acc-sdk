@@ -18,8 +18,7 @@ import {
     NoLoyaltyBridgeAddress
 } from "../../utils/errors";
 
-const providersMap = new Map<Web3Module, JsonRpcProvider[]>();
-const providerIdxMap = new Map<Web3Module, number>();
+const providersMap = new Map<Web3Module, JsonRpcProvider>();
 const signerMap = new Map<Web3Module, Signer>();
 
 const tokenAddressMap = new Map<Web3Module, string>();
@@ -36,11 +35,9 @@ const bridgeAddressMap = new Map<Web3Module, string>();
 
 export class Web3Module implements IClientWeb3Core {
     constructor(context: Context) {
-        providerIdxMap.set(this, -1);
         // Storing client data in the private module's scope to prevent external mutation
-        if (context.web3Providers) {
-            providersMap.set(this, context.web3Providers);
-            providerIdxMap.set(this, 0);
+        if (context.web3Provider) {
+            providersMap.set(this, context.web3Provider);
         }
 
         if (context.signer) {
@@ -139,12 +136,8 @@ export class Web3Module implements IClientWeb3Core {
         return bridgeAddressMap.get(this) || "";
     }
 
-    private get providers(): JsonRpcProvider[] {
-        return providersMap.get(this) || [];
-    }
-
-    private get providerIdx(): number {
-        return providerIdxMap.get(this)!;
+    private get provider(): JsonRpcProvider | undefined {
+        return providersMap.get(this);
     }
 
     private get signer(): Signer | undefined {
@@ -152,9 +145,8 @@ export class Web3Module implements IClientWeb3Core {
     }
 
     public usePrivateKey(privateKey: string): void {
-        let signer = new Wallet(privateKey)
         const provider = this.getProvider();
-        if (provider !== null) signer = signer.connect(provider);
+        const signer = provider !== undefined ? new Wallet(privateKey, provider) : new Wallet(privateKey);
         signerMap.set(this, signer);
     }
 
@@ -166,19 +158,9 @@ export class Web3Module implements IClientWeb3Core {
         signerMap.set(this, signer);
     }
 
-    /** Starts using the next available Web3 provider */
-    public shiftProvider(): void {
-        if (!this.providers.length) {
-            throw new Error("No endpoints");
-        } else if (this.providers.length <= 1) {
-            throw new Error("No other endpoints");
-        }
-        providerIdxMap.set(this, (this.providerIdx + 1) % this.providers.length);
-    }
-
     /** Retrieves the current signer */
-    public getSigner(): Signer | null {
-        return this.signer || null;
+    public getSigner(): Signer | undefined {
+        return this.signer;
     }
 
     /** Returns a signer connected to the current network provider */
@@ -200,8 +182,8 @@ export class Web3Module implements IClientWeb3Core {
     }
 
     /** Returns the currently active network provider */
-    public getProvider(): JsonRpcProvider | null {
-        return this.providers[this.providerIdx] || null;
+    public getProvider(): JsonRpcProvider | undefined {
+        return this.provider;
     }
 
     /** Returns whether the current provider is functional or not */
@@ -213,19 +195,6 @@ export class Web3Module implements IClientWeb3Core {
             .getNetwork()
             .then(() => true)
             .catch(() => false);
-    }
-
-    public async ensureOnline(): Promise<void> {
-        if (!this.providers.length) {
-            return Promise.reject(new Error("No provider"));
-        }
-
-        for (let i = 0; i < this.providers.length; i++) {
-            if (await this.isUp()) return;
-
-            this.shiftProvider();
-        }
-        throw new Error("No providers available");
     }
 
     /**
