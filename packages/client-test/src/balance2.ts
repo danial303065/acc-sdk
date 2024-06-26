@@ -23,11 +23,13 @@ async function main() {
 
     for (let idx = 0; idx < 10; idx++) {
         const user: IUserData = users[idx];
-        const tokenBalance = new BOACoin(await client.ledger.getTokenBalance(user.address));
-        const pointBalance = new BOACoin(await client.ledger.getPointBalance(user.address));
+        const balance = await client.ledger.getBalanceOfLedger(user.address);
         console.log(`idx: ${idx}`);
-        console.log(tokenBalance.toDisplayString(true, 4));
-        console.log(pointBalance.toDisplayString(true, 4));
+        console.log(`account: ${balance.account}`);
+        console.log(`point.balance: ${new BOACoin(balance.point.balance).toDisplayString(true, 4)}`);
+        console.log(`point.value: ${new BOACoin(balance.point.value).toDisplayString(true, 4)}`);
+        console.log(`token.balance: ${new BOACoin(balance.token.balance).toDisplayString(true, 4)}`);
+        console.log(`token.value: ${new BOACoin(balance.token.value).toDisplayString(true, 4)}`);
     }
 }
 

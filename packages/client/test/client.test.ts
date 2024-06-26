@@ -68,8 +68,8 @@ describe("Client", () => {
             const client = new Client(ctx);
 
             expect(client).toBeInstanceOf(Client);
-            console.log((await client.ledger.getEndpoint("/")).toString());
-            const relayStatus = await client.ledger.isRelayUp();
+            console.log((await client.ledger.relay.getEndpoint("/")).toString());
+            const relayStatus = await client.ledger.relay.isUp();
             expect(relayStatus).toEqual(true);
         });
     });

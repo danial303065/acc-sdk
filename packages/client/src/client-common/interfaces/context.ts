@@ -63,7 +63,7 @@ type Web3ContextState = {
     loyaltyBridgeAddress?: string;
 };
 type HTTPContextState = {
-    relayEndpoint?: string | URL;
+    relayEndpoint?: string;
 };
 
 export type ContextState = Web3ContextState & HTTPContextState;

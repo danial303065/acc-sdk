@@ -1,4 +1,4 @@
-import { IClientCore, IClientHttpCore } from "../client-common";
+import { IClientCore } from "../client-common";
 import {
     ApproveCancelPaymentValue,
     ApproveNewPaymentValue,
@@ -16,7 +16,8 @@ import {
     WaiteBridgeStepValue,
     WithdrawStepValue,
     WithdrawViaBridgeStepValue,
-    LedgerAction
+    LedgerAction,
+    IBalance
 } from "../interfaces";
 import { BigNumber } from "@ethersproject/bignumber";
 import { BytesLike } from "@ethersproject/bytes";
@@ -27,11 +28,9 @@ export interface ILedger {
 }
 
 /** Defines the shape of the general purpose Client class */
-export interface ILedgerMethods extends IClientCore, IClientHttpCore {
-    // Common
-    getNonceOfLedger: (account: string) => Promise<BigNumber>;
-
+export interface ILedgerMethods extends IClientCore {
     // Balance
+    getBalanceOfLedger: (account: string) => Promise<IBalance>;
     getUnPayablePointBalance: (phone: string) => Promise<BigNumber>;
     getPointBalance: (account: string) => Promise<BigNumber>;
     getTokenBalance: (account: string) => Promise<BigNumber>;
