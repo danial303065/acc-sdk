@@ -10,7 +10,7 @@ const relayMap = new Map<ClientCore, IClientRelayCore>();
  * Provides the low level foundation so that subclasses have ready-made access to Web3, IPFS and GraphQL primitives
  */
 export abstract class ClientCore implements IClientCore {
-    constructor(context: Context) {
+    protected constructor(context: Context) {
         relayMap.set(this, new RelayModule(context));
         web3Map.set(this, new Web3Module(context));
         Object.freeze(ClientCore.prototype);

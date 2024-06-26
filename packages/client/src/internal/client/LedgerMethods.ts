@@ -1,4 +1,4 @@
-import { ClientCore, Context, SupportedNetwork, SupportedNetworkArray } from "../../client-common";
+import { ClientCore, Context } from "../../client-common";
 import { ILedgerMethods } from "../../interface/ILedger";
 import {
     Ledger,
@@ -17,7 +17,7 @@ import {
     PhoneLinkCollection__factory
 } from "acc-contracts-lib-v2";
 import { JsonRpcProvider, Provider } from "@ethersproject/providers";
-import { NoProviderError, NoSignerError, UnsupportedNetworkError, UpdateAllowanceError } from "acc-sdk-common-v2";
+import { NoProviderError, NoSignerError, UpdateAllowanceError } from "acc-sdk-common-v2";
 import { ContractUtils } from "../../utils/ContractUtils";
 import { GasPriceManager } from "../../utils/GasPriceManager";
 import { NonceManager } from "../../utils/NonceManager";
@@ -61,7 +61,6 @@ import {
 } from "../../utils/errors";
 import { Network } from "../../client-common/interfaces/network";
 import { findLog } from "../../client-common/utils";
-import { getNetwork } from "../../utils/Utilty";
 
 import { BigNumber } from "@ethersproject/bignumber";
 import { ContractTransaction } from "@ethersproject/contracts";
@@ -107,12 +106,6 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
         const provider = this.web3.getProvider() as Provider;
         if (!provider) throw new NoProviderError();
 
-        const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const ledgerInstance: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), provider);
         return await ledgerInstance.unPayablePointBalanceOf(phone);
     }
@@ -125,12 +118,6 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
     public async getPointBalance(account: string): Promise<BigNumber> {
         const provider = this.web3.getProvider() as Provider;
         if (!provider) throw new NoProviderError();
-
-        const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
 
         const ledgerInstance: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), provider);
         return await ledgerInstance.pointBalanceOf(account);
@@ -145,14 +132,7 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
         const provider = this.web3.getProvider() as Provider;
         if (!provider) throw new NoProviderError();
 
-        const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const ledgerInstance: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), provider);
-
         return await ledgerInstance.tokenBalanceOf(account);
     }
 
@@ -166,14 +146,7 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
         const provider = this.web3.getProvider() as Provider;
         if (!provider) throw new NoProviderError();
 
-        const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const ledgerInstance: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), provider);
-
         return await ledgerInstance.getFee();
     }
 
@@ -185,17 +158,11 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
             throw new NoProviderError();
         }
 
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const ledgerContract: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), signer);
 
         const account = await signer.getAddress();
         const nonce = await ledgerContract.nonceOf(account);
-        const message = ContractUtils.getAccountMessage(account, nonce, network.chainId);
+        const message = ContractUtils.getAccountMessage(account, nonce, this.web3.getChainId());
         const signature = await ContractUtils.signMessage(signer, message);
 
         const param = {
@@ -259,12 +226,6 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
             throw new NoProviderError();
         }
 
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const ledgerContract: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), signer);
         const account: string = await signer.getAddress();
         const nonce = await ledgerContract.nonceOf(account);
@@ -276,7 +237,7 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
             currency,
             shopId,
             nonce,
-            network.chainId
+            this.web3.getChainId()
         );
 
         const param = {
@@ -395,12 +356,6 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
             throw new NoProviderError();
         }
 
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const ledgerContract: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), signer);
         const account: string = await signer.getAddress();
         const nonce = await ledgerContract.nonceOf(account);
@@ -409,7 +364,7 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
             paymentId,
             purchaseId,
             nonce,
-            network.chainId
+            this.web3.getChainId()
         );
 
         const param = {
@@ -575,12 +530,6 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
             throw new NoProviderError();
         }
 
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const account: string = await signer.getAddress();
 
         const ledgerContract: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), signer);
@@ -625,12 +574,6 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
             throw new NoProviderError();
         }
 
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const account: string = await signer.getAddress();
 
         const ledgerContract: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), signer);
@@ -666,12 +609,6 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
             throw new NoSignerError();
         } else if (!signer.provider) {
             throw new NoProviderError();
-        }
-
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
         }
 
         const nonceSigner = new NonceManager(new GasPriceManager(signer));
@@ -728,12 +665,6 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
             throw new NoProviderError();
         }
 
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const ledgerContract: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), signer);
 
         const phoneHash = ContractUtils.getPhoneHash(phone.trim());
@@ -753,7 +684,7 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
         const account: string = await signer.getAddress();
         let contractTx: ContractTransaction;
         const nonce = await ledgerContract.nonceOf(account);
-        const signature = await ContractUtils.signChangePayablePoint(signer, phoneHash, nonce, network.chainId);
+        const signature = await ContractUtils.signChangePayablePoint(signer, phoneHash, nonce, this.web3.getChainId());
 
         const param = {
             phone: phoneHash,
@@ -803,18 +734,17 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
             throw new NoProviderError();
         }
 
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const ledgerContract: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), signer);
         const account: string = await signer.getAddress();
         const adjustedAmount = ContractUtils.zeroGWEI(amount);
         let contractTx: ContractTransaction;
         const nonce = await ledgerContract.nonceOf(account);
-        const message = ContractUtils.getChangePointToTokenMessage(account, adjustedAmount, nonce, network.chainId);
+        const message = ContractUtils.getChangePointToTokenMessage(
+            account,
+            adjustedAmount,
+            nonce,
+            this.web3.getChainId()
+        );
         const signature = await ContractUtils.signMessage(signer, message);
 
         yield { key: NormalSteps.PREPARED, account, amount: adjustedAmount, signature };
@@ -905,17 +835,11 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
             throw new NoProviderError();
         }
 
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const ledgerContract: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), signer);
 
         const account = await signer.getAddress();
         const nonce = await ledgerContract.nonceOf(account);
-        const message = ContractUtils.getRemoveMessage(account, nonce, network.chainId);
+        const message = ContractUtils.getRemoveMessage(account, nonce, this.web3.getChainId());
         const signature = await ContractUtils.signMessage(signer, message);
         let contractTx: ContractTransaction;
 
@@ -962,12 +886,6 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
             throw new NoProviderError();
         }
 
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const account = await signer.getAddress();
         const adjustedAmount = ContractUtils.zeroGWEI(amount);
 
@@ -975,7 +893,7 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
         const nonce = await this.relay.getNonceOfLedger(account);
         const expiry = ContractUtils.getTimeStamp() + 60;
         const message = ContractUtils.getTransferMessage(
-            network.chainId,
+            this.web3.getChainId(),
             this.web3.getLoyaltyTransferAddress(),
             account,
             to,

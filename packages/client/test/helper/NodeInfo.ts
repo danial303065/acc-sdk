@@ -6,7 +6,7 @@ import {
     ContractUtils,
     ContextBuilder,
     GasPriceManager,
-    IContextParams,
+    ContextParams,
     LIVE_CONTRACTS,
     NonceManager,
     SupportedNetwork,
@@ -479,7 +479,7 @@ export class NodeInfo {
         return this.resolveWeb3Provider(LIVE_CONTRACTS[networkName].web3Endpoint, LIVE_CONTRACTS[networkName].network);
     }
 
-    public static getContextParams(): IContextParams {
+    public static getContextParams(): ContextParams {
         if (NodeInfo.initialAccounts === undefined) {
             NodeInfo.initialAccounts = NodeInfo.CreateInitialAccounts();
         }

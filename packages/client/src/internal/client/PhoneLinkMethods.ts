@@ -1,6 +1,6 @@
-import { ClientCore, Context, findLog, SupportedNetwork, SupportedNetworkArray } from "../../client-common";
+import { ClientCore, Context, findLog } from "../../client-common";
 import { PhoneLinkCollection, PhoneLinkCollection__factory } from "acc-contracts-lib-v2";
-import { NoProviderError, NoSignerError, UnsupportedNetworkError } from "acc-sdk-common-v2";
+import { NoProviderError, NoSignerError } from "acc-sdk-common-v2";
 import {
     NormalSteps,
     PhoneLinkRegisterSteps,
@@ -11,7 +11,6 @@ import {
     RemovePhoneInfoStepValue
 } from "../../interfaces";
 import { ContractUtils } from "../../utils/ContractUtils";
-import { getNetwork } from "../../utils/Utilty";
 
 import { IPhoneLinkMethods } from "../../interface/IPhoneLink";
 import { Network } from "../../client-common/interfaces/network";
@@ -65,12 +64,6 @@ export class PhoneLinkMethods extends ClientCore implements IPhoneLinkMethods {
             throw new NoProviderError();
         }
 
-        const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const contract = PhoneLinkCollection__factory.connect(this.web3.getLinkAddress(), provider);
         const validators = await contract.getValidators();
         if (validators.length === 0) {
@@ -95,17 +88,11 @@ export class PhoneLinkMethods extends ClientCore implements IPhoneLinkMethods {
             throw new NoProviderError();
         }
 
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const contract = PhoneLinkCollection__factory.connect(this.web3.getLinkAddress(), signer);
         const address = await signer.getAddress();
         const nonce = await contract.nonceOf(address);
         const phoneHash = ContractUtils.getPhoneHash(phone);
-        const msg = ContractUtils.getRequestMessage(phoneHash, address, nonce, network.chainId);
+        const msg = ContractUtils.getRequestMessage(phoneHash, address, nonce, this.web3.getChainId());
         const signature = await ContractUtils.signMessage(signer, msg);
         const param = { phone, address, signature };
         const res = await Network.post(await this.getEndpoint("/request"), param);
@@ -175,12 +162,6 @@ export class PhoneLinkMethods extends ClientCore implements IPhoneLinkMethods {
             throw new NoProviderError();
         }
 
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const param = { requestId, code };
         const res = await Network.post(await this.getEndpoint("/submit"), param);
 
@@ -236,14 +217,7 @@ export class PhoneLinkMethods extends ClientCore implements IPhoneLinkMethods {
             throw new NoProviderError();
         }
 
-        const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const contract = PhoneLinkCollection__factory.connect(this.web3.getLinkAddress(), provider);
-
         return await contract.toAddress(phone);
     }
 
@@ -253,14 +227,7 @@ export class PhoneLinkMethods extends ClientCore implements IPhoneLinkMethods {
             throw new NoProviderError();
         }
 
-        const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const contract = PhoneLinkCollection__factory.connect(this.web3.getLinkAddress(), provider);
-
         return await contract.toPhone(address);
     }
 
@@ -268,12 +235,6 @@ export class PhoneLinkMethods extends ClientCore implements IPhoneLinkMethods {
         const provider = this.web3.getProvider();
         if (!provider) {
             throw new NoProviderError();
-        }
-
-        const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
         }
 
         const contract = PhoneLinkCollection__factory.connect(this.web3.getLinkAddress(), provider);
@@ -292,12 +253,6 @@ export class PhoneLinkMethods extends ClientCore implements IPhoneLinkMethods {
             throw new NoProviderError();
         }
 
-        const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const contract: PhoneLinkCollection = PhoneLinkCollection__factory.connect(
             this.web3.getLedgerAddress(),
             signer
@@ -305,7 +260,7 @@ export class PhoneLinkMethods extends ClientCore implements IPhoneLinkMethods {
 
         const account = await signer.getAddress();
         const nonce = await contract.nonceOf(account);
-        const message = ContractUtils.getRemoveMessage(account, nonce, network.chainId);
+        const message = ContractUtils.getRemoveMessage(account, nonce, this.web3.getChainId());
         const signature = await ContractUtils.signMessage(signer, message);
         let contractTx: ContractTransaction;
 

@@ -1,11 +1,10 @@
-import { ClientCore, Context, SupportedNetwork, SupportedNetworkArray } from "../../client-common";
+import { ClientCore, Context } from "../../client-common";
 import { ICurrencyMethods } from "../../interface/ICurrency";
 import { CurrencyRate, CurrencyRate__factory, LoyaltyToken, LoyaltyToken__factory } from "acc-contracts-lib-v2";
 import { Provider } from "@ethersproject/providers";
-import { NoProviderError, UnsupportedNetworkError } from "acc-sdk-common-v2";
+import { NoProviderError } from "acc-sdk-common-v2";
 import { BigNumber } from "@ethersproject/bignumber";
 import { ContractUtils } from "../../utils/ContractUtils";
-import { getNetwork } from "../../utils/Utilty";
 
 /**
  * 환률정보를 제공하고, 통화량을 환산하는 기능이 포함된 클래스이다.
@@ -25,12 +24,6 @@ export class CurrencyMethods extends ClientCore implements ICurrencyMethods {
         const provider = this.web3.getProvider() as Provider;
         if (!provider) throw new NoProviderError();
 
-        const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetwork;
-        if (!SupportedNetworkArray.includes(networkName)) {
-            throw new UnsupportedNetworkError(networkName);
-        }
-
         const contract: CurrencyRate = CurrencyRate__factory.connect(this.web3.getCurrencyRateAddress(), provider);
         return await contract.get(symbol);
     }
@@ -40,12 +33,6 @@ export class CurrencyMethods extends ClientCore implements ICurrencyMethods {
         if (CurrencyMethods._CurrencyMultiple.eq(BigNumber.from(0))) {
             const provider = this.web3.getProvider() as Provider;
             if (!provider) throw new NoProviderError();
-
-            const network = getNetwork((await provider.getNetwork()).chainId);
-            const networkName = network.name as SupportedNetwork;
-            if (!SupportedNetworkArray.includes(networkName)) {
-                throw new UnsupportedNetworkError(networkName);
-            }
 
             const contract: CurrencyRate = CurrencyRate__factory.connect(this.web3.getCurrencyRateAddress(), provider);
             CurrencyMethods._CurrencyMultiple = await contract.multiple();
@@ -58,12 +45,6 @@ export class CurrencyMethods extends ClientCore implements ICurrencyMethods {
         if (CurrencyMethods._TokenSymbol === "") {
             const provider = this.web3.getProvider() as Provider;
             if (!provider) throw new NoProviderError();
-
-            const network = getNetwork((await provider.getNetwork()).chainId);
-            const networkName = network.name as SupportedNetwork;
-            if (!SupportedNetworkArray.includes(networkName)) {
-                throw new UnsupportedNetworkError(networkName);
-            }
 
             const contract: LoyaltyToken = LoyaltyToken__factory.connect(this.web3.getTokenAddress(), provider);
             CurrencyMethods._TokenSymbol = await contract.symbol();

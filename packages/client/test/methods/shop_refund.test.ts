@@ -216,7 +216,7 @@ describe("Shop Withdrawal", () => {
                 phone: phoneHash,
                 sender: await accounts[AccountIndex.FOUNDATION].getAddress()
             };
-            const purchaseMessage = ContractUtils.getPurchasesMessage(0, [purchaseParams], NodeInfo.CHAIN_ID);
+            const purchaseMessage = ContractUtils.getPurchasesMessage(0, [purchaseParams], NodeInfo.getChainId());
             const signatures = await Promise.all(
                 validatorWallets.map((m) => ContractUtils.signMessage(m, purchaseMessage))
             );
@@ -224,7 +224,7 @@ describe("Shop Withdrawal", () => {
                 0,
                 [purchaseParams],
                 signatures,
-                NodeInfo.CHAIN_ID
+                NodeInfo.getChainId()
             );
             const proposerSignature = await ContractUtils.signMessage(validatorWallets[4], proposeMessage);
             await contractInfo.loyaltyProvider
