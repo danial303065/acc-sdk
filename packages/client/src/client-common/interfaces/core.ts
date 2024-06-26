@@ -7,12 +7,10 @@ import { JsonRpcProvider } from "@ethersproject/providers";
 export interface IClientWeb3Core {
     usePrivateKey: (privateKey: string) => void;
     useSigner: (signer: Signer) => void;
-    shiftProvider: () => void;
-    getSigner: () => Signer | null;
+    getSigner: () => Signer | undefined;
     getConnectedSigner: () => Signer;
-    getProvider: () => JsonRpcProvider | null;
+    getProvider: () => JsonRpcProvider | undefined;
     isUp: () => Promise<boolean>;
-    ensureOnline: () => Promise<void>;
     attachContract: <T>(address: string, abi: ContractInterface) => Contract & T;
     getTokenAddress: () => string;
     getLinkAddress: () => string;

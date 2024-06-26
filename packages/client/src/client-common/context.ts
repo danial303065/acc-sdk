@@ -16,18 +16,8 @@ const supportedProtocols = ["https:", "http:"];
 //     supportedProtocols.push("http:");
 // }
 
-// State
-const defaultState: ContextState = {
-    network: {
-        name: "acc_mainnet",
-        chainId: 215110
-    },
-    web3Providers: [],
-    relayEndpoint: undefined
-};
-
 export class Context {
-    protected state: ContextState = Object.assign({}, defaultState);
+    protected state: ContextState = Object.assign({});
 
     // INTERNAL CONTEXT STATE
 
@@ -50,7 +40,7 @@ export class Context {
      * @public
      */
     get network() {
-        return this.state.network || defaultState.network;
+        return this.state.network;
     }
 
     /**
@@ -63,7 +53,7 @@ export class Context {
      * @public
      */
     get signer() {
-        return this.state.signer || defaultState.signer;
+        return this.state.signer;
     }
 
     // GETTERS
@@ -71,18 +61,18 @@ export class Context {
     /**
      * Getter for the web3 providers
      *
-     * @var web3Providers
+     * @var web3Provider
      *
      * @returns {JsonRpcProvider[]}
      *
      * @public
      */
-    get web3Providers() {
-        return this.state.web3Providers || defaultState.web3Providers;
+    get web3Provider() {
+        return this.state.web3Provider;
     }
 
     get relayEndpoint() {
-        return this.state.relayEndpoint || defaultState.relayEndpoint;
+        return this.state.relayEndpoint;
     }
 
     get tokenAddress(): string | undefined {
@@ -123,10 +113,6 @@ export class Context {
         return this.state.loyaltyBridgeAddress;
     }
 
-    static getDefault() {
-        return defaultState;
-    }
-
     // INTERNAL HELPERS
     private static resolveNetwork(networkish: Networkish, ensRegistryAddress?: string): Network {
         const network = getNetwork(networkish);
@@ -149,29 +135,15 @@ export class Context {
         return network;
     }
 
-    private static resolveWeb3Providers(
-        endpoints: string | JsonRpcProvider | (string | JsonRpcProvider)[],
-        network: Networkish
-    ): JsonRpcProvider[] {
-        if (Array.isArray(endpoints)) {
-            return endpoints.map((item) => {
-                if (typeof item === "string") {
-                    const url = new URL(item);
-                    if (!supportedProtocols.includes(url.protocol)) {
-                        throw new UnsupportedProtocolError(url.protocol);
-                    }
-                    return new JsonRpcProvider(url.href, this.resolveNetwork(network));
-                }
-                return item;
-            });
-        } else if (typeof endpoints === "string") {
-            const url = new URL(endpoints);
+    private static resolveweb3Provider(endpoint: string | JsonRpcProvider, network: Networkish): JsonRpcProvider {
+        if (typeof endpoint === "string") {
+            const url = new URL(endpoint);
             if (!supportedProtocols.includes(url.protocol)) {
                 throw new UnsupportedProtocolError(url.protocol);
             }
-            return [new JsonRpcProvider(url.href, this.resolveNetwork(network))];
+            return new JsonRpcProvider(url.href, this.resolveNetwork(network));
         } else {
-            return [endpoints];
+            return endpoint;
         }
     }
 
@@ -187,7 +159,7 @@ export class Context {
             throw new Error("Missing network");
         } else if (!contextParams.privateKey) {
             throw new Error("Please pass the required signer");
-        } else if (!contextParams.web3Providers) {
+        } else if (!contextParams.web3Provider) {
             throw new Error("No web3 endpoints defined");
         } else if (!contextParams.tokenAddress) {
             throw new Error("Missing token contract address");
@@ -216,7 +188,7 @@ export class Context {
         this.state = {
             network: contextParams.network,
             signer: new Wallet(contextParams.privateKey),
-            web3Providers: Context.resolveWeb3Providers(contextParams.web3Providers, contextParams.network),
+            web3Provider: Context.resolveweb3Provider(contextParams.web3Provider, contextParams.network),
             tokenAddress: contextParams.tokenAddress,
             phoneLinkAddress: contextParams.phoneLinkAddress,
             validatorAddress: contextParams.validatorAddress,
@@ -238,8 +210,8 @@ export class Context {
         if (contextParams.privateKey) {
             this.state.signer = new Wallet(contextParams.privateKey);
         }
-        if (contextParams.web3Providers) {
-            this.state.web3Providers = Context.resolveWeb3Providers(contextParams.web3Providers, this.state.network);
+        if (contextParams.web3Provider) {
+            this.state.web3Provider = Context.resolveweb3Provider(contextParams.web3Provider, this.state.network);
         }
         if (contextParams.relayEndpoint) {
             this.state.relayEndpoint = contextParams.relayEndpoint;
@@ -297,7 +269,7 @@ export class ContextBuilder {
             loyaltyTransferAddress: LIVE_CONTRACTS[networkName].LoyaltyTransferAddress,
             loyaltyBridgeAddress: LIVE_CONTRACTS[networkName].LoyaltyBridgeAddress,
             relayEndpoint: LIVE_CONTRACTS[networkName].relayEndpoint,
-            web3Providers: LIVE_CONTRACTS[networkName].web3Endpoint
+            web3Provider: LIVE_CONTRACTS[networkName].web3Endpoint
         };
         return contextParams;
     }

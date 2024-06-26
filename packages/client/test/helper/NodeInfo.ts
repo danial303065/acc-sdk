@@ -99,10 +99,7 @@ export interface IContractInfo {
 export class NodeInfo {
     public static initialAccounts: any[];
     public static RELAY_ACCESS_KEY = process.env.RELAY_ACCESS_KEY || "";
-    public static NODE_END_POINT = process.env.NODE_END_POINT_FOR_TEST || "";
-    public static RELAY_END_POINT = process.env.RELAY_END_POINT_FOR_TEST || "";
     public static NETWORK_NAME: SupportedNetwork = (process.env.NETWORK_NAME || "acc_devnet") as SupportedNetwork;
-    public static CHAIN_ID: number = Number(process.env.CHAIN_ID || "24680");
 
     public static CreateInitialAccounts(): any[] {
         const accounts: string[] = [];
@@ -468,7 +465,7 @@ export class NodeInfo {
         return network;
     }
 
-    private static resolveWeb3Providers(endpoints: string | JsonRpcProvider, network: Networkish): JsonRpcProvider {
+    private static resolveWeb3Provider(endpoints: string | JsonRpcProvider, network: Networkish): JsonRpcProvider {
         if (typeof endpoints === "string") {
             const url = new URL(endpoints);
             return new JsonRpcProvider(url.href, this.resolveNetwork(network));
@@ -479,7 +476,7 @@ export class NodeInfo {
 
     public static createProvider(): JsonRpcProvider {
         const networkName = this.NETWORK_NAME;
-        return this.resolveWeb3Providers(LIVE_CONTRACTS[networkName].web3Endpoint, LIVE_CONTRACTS[networkName].network);
+        return this.resolveWeb3Provider(LIVE_CONTRACTS[networkName].web3Endpoint, LIVE_CONTRACTS[networkName].network);
     }
 
     public static getContextParams(): IContextParams {
@@ -488,6 +485,11 @@ export class NodeInfo {
         }
         const networkName = this.NETWORK_NAME;
         return ContextBuilder.buildContextParams(networkName, NodeInfo.initialAccounts[0].secretKey);
+    }
+
+    public static getChainId(): number {
+        const contextParams = NodeInfo.getContextParams();
+        return contextParams.network;
     }
 
     public static getContractInfo(): IContractInfo {
@@ -603,9 +605,10 @@ export class NodeInfo {
                 rate: BigNumber.from(1000000000)
             }
         ];
-        const message = ContractUtils.getCurrencyMessage(height, rates, NodeInfo.CHAIN_ID);
+        const chainId = NodeInfo.getChainId();
+        const message = ContractUtils.getCurrencyMessage(height, rates, chainId);
         const signatures = await Promise.all(validators.map((m) => ContractUtils.signMessage(m, message)));
-        const proposeMessage = ContractUtils.getCurrencyProposeMessage(height, rates, signatures, NodeInfo.CHAIN_ID);
+        const proposeMessage = ContractUtils.getCurrencyProposeMessage(height, rates, signatures, chainId);
         const proposerSignature = await ContractUtils.signMessage(validators[0], proposeMessage);
         const tx1 = await currencyRateContract.connect(validators[0]).set(height, rates, signatures, proposerSignature);
         await tx1.wait();

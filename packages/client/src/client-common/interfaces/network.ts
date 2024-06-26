@@ -1,4 +1,6 @@
-import fetch, { UnfetchResponse } from "unfetch";
+// @ts-ignore
+import { UnfetchResponse } from "unfetch";
+import fetch from "unfetch";
 import { GenericRecord } from "./common";
 import { NetworkError, BadRequestError, NotFoundError } from "../../utils/errors";
 

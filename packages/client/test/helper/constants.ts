@@ -4,18 +4,18 @@ import { ContextParams } from "../../src";
 dotenv.config({ path: "env/.env" });
 
 export const web3EndpointsMainnet = {
-    working: ["https://rpc.main.acccoin.io/"],
-    failing: ["https://bad-url-gateway.io/"]
+    working: "https://rpc.main.acccoin.io/",
+    failing: "https://bad-url-gateway.io/"
 };
 
 export const web3EndpointsTestnet = {
-    working: ["https://rpc.test.acccoin.io/"],
-    failing: ["https://bad-url-gateway.io/"]
+    working: "https://rpc.test.acccoin.io/",
+    failing: "https://bad-url-gateway.io/"
 };
 
 export const web3EndpointsDevnet = {
-    working: ["http://rpc-side.dev.acccoin.io:28545/"],
-    failing: ["https://bad-url-gateway.io/"]
+    working: "http://rpc-side.dev.acccoin.io:28545/",
+    failing: "https://bad-url-gateway.io/"
 };
 
 export const TEST_WALLET = "d09672244a06a32f74d051e5adbbb62ae0eda27832a973159d475da6d53ba5c0";
@@ -38,33 +38,33 @@ export const relayEndpointsDevnet = {
 export const contextParamsMainnet: ContextParams = {
     network: 215110,
     privateKey: TEST_WALLET,
-    web3Providers: web3EndpointsMainnet.working,
+    web3Provider: web3EndpointsMainnet.working,
     relayEndpoint: relayEndpointsMainnet.working
 };
 
 export const contextParamsTestnet: ContextParams = {
     network: 215115,
     privateKey: TEST_WALLET,
-    web3Providers: web3EndpointsTestnet.working,
+    web3Provider: web3EndpointsTestnet.working,
     relayEndpoint: relayEndpointsTestnet.working
 };
 
 export const contextParamsDevnet: ContextParams = {
     network: 24680,
     privateKey: TEST_WALLET,
-    web3Providers: web3EndpointsDevnet.working,
+    web3Provider: web3EndpointsDevnet.working,
     relayEndpoint: relayEndpointsDevnet.working
 };
 
 export const contextParamsLocalChain: ContextParams = {
     network: 24680,
     privateKey: TEST_WALLET,
-    web3Providers: ["http://localhost:8545"],
+    web3Provider: "http://localhost:8545",
     relayEndpoint: "http://localhost:7070"
 };
 
 export const contextParamsFailing: ContextParams = {
     network: 24680,
     privateKey: TEST_WALLET,
-    web3Providers: web3EndpointsMainnet.failing
+    web3Provider: web3EndpointsMainnet.failing
 };

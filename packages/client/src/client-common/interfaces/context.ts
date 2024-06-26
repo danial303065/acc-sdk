@@ -7,7 +7,7 @@ import { JsonRpcProvider, Networkish } from "@ethersproject/providers";
 type Web3ContextParams = {
     network: number;
     privateKey?: string;
-    web3Providers?: string | (string )[];
+    web3Provider?: string;
     phoneLinkAddress?: string;
     tokenAddress?: string;
     validatorAddress?: string;
@@ -20,6 +20,7 @@ type Web3ContextParams = {
     loyaltyTransferAddress?: string;
     loyaltyBridgeAddress?: string;
 };
+
 type HttpContextParams = {
     relayEndpoint?: string;
 };
@@ -40,7 +41,7 @@ export interface IContextParams {
     loyaltyExchangerAddress: string;
     loyaltyTransferAddress: string;
     loyaltyBridgeAddress: string;
-    web3Providers: string;
+    web3Provider: string;
     relayEndpoint: string;
 }
 
@@ -48,7 +49,7 @@ export interface IContextParams {
 type Web3ContextState = {
     network: Networkish;
     signer?: Signer;
-    web3Providers: JsonRpcProvider[];
+    web3Provider: JsonRpcProvider;
     phoneLinkAddress?: string;
     tokenAddress?: string;
     validatorAddress?: string;
