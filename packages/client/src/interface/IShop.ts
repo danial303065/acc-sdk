@@ -1,4 +1,4 @@
-import { IClientCore, IClientHttpCore } from "../client-common";
+import { IClientCore } from "../client-common";
 import { BigNumber } from "@ethersproject/bignumber";
 import {
     AddShopStepValue,
@@ -18,7 +18,7 @@ export interface IShop {
 }
 
 /** Defines the shape of the general purpose Client class */
-export interface IShopMethods extends IClientCore, IClientHttpCore {
+export interface IShopMethods extends IClientCore {
     // Common
     getShopInfo: (shopId: BytesLike) => Promise<ShopData>;
 

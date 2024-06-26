@@ -78,7 +78,7 @@ describe("Integrated test of Shop", () => {
         });
 
         it("Server Health Checking", async () => {
-            const isUp = await client.ledger.isRelayUp();
+            const isUp = await client.ledger.relay.isUp();
             expect(isUp).toEqual(true);
         });
 
@@ -115,7 +115,7 @@ describe("Integrated test of Shop", () => {
                         sender: foundation
                     };
                 });
-                const purchaseMessage = ContractUtils.getPurchasesMessage(0, purchaseParams, NodeInfo.CHAIN_ID);
+                const purchaseMessage = ContractUtils.getPurchasesMessage(0, purchaseParams, NodeInfo.getChainId());
                 const signatures = await Promise.all(
                     validatorWallets.map((m) => ContractUtils.signMessage(m, purchaseMessage))
                 );
@@ -123,7 +123,7 @@ describe("Integrated test of Shop", () => {
                     0,
                     purchaseParams,
                     signatures,
-                    NodeInfo.CHAIN_ID
+                    NodeInfo.getChainId()
                 );
                 const proposerSignature = await ContractUtils.signMessage(validatorWallets[4], proposeMessage);
                 await contractInfo.loyaltyProvider

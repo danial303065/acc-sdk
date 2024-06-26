@@ -10,8 +10,8 @@ async function TestOfTestnet() {
     const context: Context = ContextBuilder.buildContextOfTestnet(TestUtils.TEST_PK);
     const client = new Client(context);
 
-    console.log((await client.ledger.getEndpoint("/")).toString());
-    const relayStatus = await client.ledger.isRelayUp();
+    console.log((await client.ledger.relay.getEndpoint("/")).toString());
+    const relayStatus = await client.ledger.relay.isUp();
     console.log(`relayStatus: ${relayStatus}`);
 }
 
@@ -22,8 +22,8 @@ async function TestOfDevnet() {
     const context: Context = ContextBuilder.buildContextOfDevnet(TestUtils.TEST_PK);
     const client = new Client(context);
 
-    console.log((await client.ledger.getEndpoint("/")).toString());
-    const relayStatus = await client.ledger.isRelayUp();
+    console.log((await client.ledger.relay.getEndpoint("/")).toString());
+    const relayStatus = await client.ledger.relay.isUp();
     console.log(`relayStatus: ${relayStatus}`);
 }
 

@@ -1,11 +1,4 @@
-import {
-    ClientCore,
-    Context,
-    findLog,
-    IClientHttpCore,
-    SupportedNetwork,
-    SupportedNetworkArray
-} from "../../client-common";
+import { ClientCore, Context, findLog, SupportedNetwork, SupportedNetworkArray } from "../../client-common";
 import { PhoneLinkCollection, PhoneLinkCollection__factory } from "acc-contracts-lib-v2";
 import { NoProviderError, NoSignerError, UnsupportedNetworkError } from "acc-sdk-common-v2";
 import {
@@ -31,7 +24,7 @@ import { ContractTransaction } from "@ethersproject/contracts";
 /**
  * 사용자의 전화번화와 지갑주소를 링크하여 스마트컨트랙트에 저장하는 기능이 포함되어 있다.
  */
-export class PhoneLinkMethods extends ClientCore implements IPhoneLinkMethods, IClientHttpCore {
+export class PhoneLinkMethods extends ClientCore implements IPhoneLinkMethods {
     constructor(context: Context) {
         super(context);
 
@@ -43,7 +36,7 @@ export class PhoneLinkMethods extends ClientCore implements IPhoneLinkMethods, I
      * 검증자가 정상적인 상태인지 검사한다.
      * @return {Promise<boolean>} 이 값이 true 이면 릴레이 서버가 정상이다.
      */
-    public async isRelayUp(): Promise<boolean> {
+    public async isUp(): Promise<boolean> {
         try {
             const res = await Network.get(await this.getEndpoint("/"));
             return res === "OK";

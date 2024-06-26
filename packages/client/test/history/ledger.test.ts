@@ -30,7 +30,7 @@ describe("Integrated test of Ledger", () => {
         });
 
         it("Server Health Checking", async () => {
-            const isUp = await client.ledger.isRelayUp();
+            const isUp = await client.ledger.relay.isUp();
             expect(isUp).toEqual(true);
         });
 

@@ -603,3 +603,15 @@ export interface IChainInfo {
         loyaltyBridge: string;
     };
 }
+
+export interface IBalance {
+    account: string;
+    point: {
+        balance: BigNumber;
+        value: BigNumber;
+    };
+    token: {
+        balance: BigNumber;
+        value: BigNumber;
+    };
+}

@@ -129,7 +129,7 @@ describe("Ledger", () => {
     });
 
     it("Server Health Checking", async () => {
-        const isUp = await client.ledger.isRelayUp();
+        const isUp = await client.ledger.relay.isUp();
         expect(isUp).toEqual(true);
     });
 
@@ -168,7 +168,7 @@ describe("Ledger", () => {
             phone: phoneHash,
             sender: await accounts[AccountIndex.FOUNDATION].getAddress()
         };
-        const purchaseMessage = ContractUtils.getPurchasesMessage(0, [purchaseParams], NodeInfo.CHAIN_ID);
+        const purchaseMessage = ContractUtils.getPurchasesMessage(0, [purchaseParams], NodeInfo.getChainId());
         const signatures = await Promise.all(
             validatorWallets.map((m) => ContractUtils.signMessage(m, purchaseMessage))
         );
@@ -176,7 +176,7 @@ describe("Ledger", () => {
             0,
             [purchaseParams],
             signatures,
-            NodeInfo.CHAIN_ID
+            NodeInfo.getChainId()
         );
         const proposerSignature = await ContractUtils.signMessage(validatorWallets[4], proposeMessage);
         await contractInfo.loyaltyProvider
@@ -197,7 +197,7 @@ describe("Ledger", () => {
             phone: phoneHash,
             sender: await accounts[AccountIndex.FOUNDATION].getAddress()
         };
-        const purchaseMessage = ContractUtils.getPurchasesMessage(0, [purchaseParams], NodeInfo.CHAIN_ID);
+        const purchaseMessage = ContractUtils.getPurchasesMessage(0, [purchaseParams], NodeInfo.getChainId());
         const signatures = await Promise.all(
             validatorWallets.map((m) => ContractUtils.signMessage(m, purchaseMessage))
         );
@@ -205,7 +205,7 @@ describe("Ledger", () => {
             0,
             [purchaseParams],
             signatures,
-            NodeInfo.CHAIN_ID
+            NodeInfo.getChainId()
         );
         const proposerSignature = await ContractUtils.signMessage(validatorWallets[4], proposeMessage);
         await contractInfo.loyaltyProvider
@@ -234,7 +234,7 @@ describe("Ledger", () => {
 
     it("Link phone-wallet", async () => {
         const nonce = await contractInfo.phoneLinkCollection.nonceOf(userAddress);
-        const msg = ContractUtils.getRequestMessage(phoneHash, await signer.getAddress(), nonce, NodeInfo.CHAIN_ID);
+        const msg = ContractUtils.getRequestMessage(phoneHash, await signer.getAddress(), nonce, NodeInfo.getChainId());
         const signature = await ContractUtils.signMessage(signer, msg);
         const requestId = ContractUtils.getRequestId(phoneHash, userAddress, nonce);
         //Add Phone

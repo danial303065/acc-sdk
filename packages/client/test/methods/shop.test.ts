@@ -38,7 +38,7 @@ describe("Shop", () => {
     });
 
     it("Server Health Checking", async () => {
-        const isUp = await client.shop.isRelayUp();
+        const isUp = await client.shop.relay.isUp();
         expect(isUp).toEqual(true);
     });
 

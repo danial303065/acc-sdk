@@ -1,4 +1,4 @@
-import { IClientCore, IClientHttpCore } from "../client-common";
+import { IClientCore } from "../client-common";
 import { PhoneLinkRegisterStepValue, PhoneLinkSubmitStepValue, RemovePhoneInfoStepValue } from "../interfaces";
 import { BytesLike } from "@ethersproject/bytes";
 
@@ -7,7 +7,9 @@ export interface IPhoneLink {
 }
 
 /** Defines the shape of the general purpose Client class */
-export interface IPhoneLinkMethods extends IClientCore, IClientHttpCore {
+export interface IPhoneLinkMethods extends IClientCore {
+    isUp: () => Promise<boolean>;
+    getEndpoint: (path: string) => Promise<URL>;
     toAddress: (phone: string) => Promise<string>;
     toPhoneNumber: (address: string) => Promise<string>;
     register: (phone: string) => AsyncGenerator<PhoneLinkRegisterStepValue>;

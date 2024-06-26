@@ -7,7 +7,8 @@
         "check:web3": "npx ts-node src/checkWeb3.ts",
         "check:relay": "npx ts-node src/checkRelay.ts",
         "payment": "npx ts-node src/payment.ts",
-        "balance": "npx ts-node src/balance.ts"
+        "balance": "npx ts-node src/balance.ts",
+        "balance2": "npx ts-node src/balance2.ts"
     },
     "directories": {
         "test": "test"

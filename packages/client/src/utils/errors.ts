@@ -219,3 +219,9 @@ export class FailedTransactionError extends Error {
         super("Failed to process transaction");
     }
 }
+
+export class NoRelayEndpointError extends Error {
+    constructor() {
+        super("Endpoint of relay is needed");
+    }
+}
