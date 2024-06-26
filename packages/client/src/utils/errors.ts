@@ -88,6 +88,12 @@ export class BodyParseError extends ClientError {
     }
 }
 
+export class NoNetwork extends Error {
+    constructor() {
+        super("A network is needed");
+    }
+}
+
 export class NoTokenAddress extends Error {
     constructor() {
         super("A token address is needed");

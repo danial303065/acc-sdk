@@ -1,5 +1,5 @@
 import { Wallet } from "@ethersproject/wallet";
-import { JsonRpcProvider } from "@ethersproject/providers";
+import { JsonRpcProvider, Networkish } from "@ethersproject/providers";
 import { Contract, ContractInterface } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
 import { IClientWeb3Core } from "../interfaces/core";
@@ -15,9 +15,13 @@ import {
     NoLoyaltyConsumerAddress,
     NoLoyaltyExchangerAddress,
     NoLoyaltyTransferAddress,
-    NoLoyaltyBridgeAddress
+    NoLoyaltyBridgeAddress,
+    NoNetwork
 } from "../../utils/errors";
 
+import { UnsupportedNetworkError } from "acc-sdk-common-v2";
+
+const networkMap = new Map<Web3Module, Networkish>();
 const providersMap = new Map<Web3Module, JsonRpcProvider>();
 const signerMap = new Map<Web3Module, Signer>();
 
@@ -36,6 +40,10 @@ const bridgeAddressMap = new Map<Web3Module, string>();
 export class Web3Module implements IClientWeb3Core {
     constructor(context: Context) {
         // Storing client data in the private module's scope to prevent external mutation
+        if (context.network) {
+            networkMap.set(this, context.network);
+        }
+
         if (context.web3Provider) {
             providersMap.set(this, context.web3Provider);
         }
@@ -90,6 +98,10 @@ export class Web3Module implements IClientWeb3Core {
 
         Object.freeze(Web3Module.prototype);
         Object.freeze(this);
+    }
+
+    private get network(): Networkish | undefined {
+        return networkMap.get(this);
     }
 
     private get tokenAddress(): string {
@@ -225,6 +237,25 @@ export class Web3Module implements IClientWeb3Core {
         }
 
         return contract.connect(signer) as Contract & T;
+    }
+
+    public getNetwork(): Networkish {
+        if (!this.network) {
+            throw new NoNetwork();
+        }
+        return this.network;
+    }
+
+    public getChainId(): number {
+        const network = this.getNetwork();
+        if (typeof network == "string") {
+            throw new UnsupportedNetworkError(network);
+        } else if (typeof network == "number") {
+            return network;
+        } else {
+            if (network.chainId !== undefined) return network.chainId;
+            else throw new UnsupportedNetworkError("");
+        }
     }
 
     public getTokenAddress(): string {

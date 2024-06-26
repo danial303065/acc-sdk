@@ -25,6 +25,7 @@ export interface IClientWeb3Core {
     getLoyaltyExchangerAddress: () => string;
     getLoyaltyTransferAddress: () => string;
     getLoyaltyBridgeAddress: () => string;
+    getChainId: () => number;
 }
 
 export interface IClientRelayCore {

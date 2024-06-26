@@ -1,4 +1,4 @@
-import { ContextParams, ContextState, IContextParams } from "./interfaces/context";
+import { ContextParams, ContextState } from "./interfaces/context";
 import { SupportedNetwork, SupportedNetworkArray } from "./interfaces/common";
 import { InvalidAddressError, UnsupportedProtocolError, UnsupportedNetworkError } from "acc-sdk-common-v2";
 import { getNetwork } from "../utils/Utilty";
@@ -253,8 +253,8 @@ export class Context {
 }
 
 export class ContextBuilder {
-    public static buildContextParams(networkName: SupportedNetwork, defaultPrivateKey: string): IContextParams {
-        const contextParams: IContextParams = {
+    public static buildContextParams(networkName: SupportedNetwork, defaultPrivateKey: string): ContextParams {
+        const contextParams: ContextParams = {
             network: LIVE_CONTRACTS[networkName].network,
             privateKey: defaultPrivateKey,
             tokenAddress: LIVE_CONTRACTS[networkName].LoyaltyTokenAddress,
@@ -274,15 +274,15 @@ export class ContextBuilder {
         return contextParams;
     }
 
-    public static buildContextParamsOfMainnet(defaultPrivateKey: string): IContextParams {
+    public static buildContextParamsOfMainnet(defaultPrivateKey: string): ContextParams {
         return ContextBuilder.buildContextParams(SupportedNetwork.ACC_MAINNET, defaultPrivateKey);
     }
 
-    public static buildContextParamsOfTestnet(defaultPrivateKey: string): IContextParams {
+    public static buildContextParamsOfTestnet(defaultPrivateKey: string): ContextParams {
         return ContextBuilder.buildContextParams(SupportedNetwork.ACC_TESTNET, defaultPrivateKey);
     }
 
-    public static buildContextParamsOfDevnet(defaultPrivateKey: string): IContextParams {
+    public static buildContextParamsOfDevnet(defaultPrivateKey: string): ContextParams {
         return ContextBuilder.buildContextParams(SupportedNetwork.ACC_DEVNET, defaultPrivateKey);
     }
 

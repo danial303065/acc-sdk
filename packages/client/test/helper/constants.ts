@@ -1,6 +1,7 @@
 import * as dotenv from "dotenv";
 
 import { ContextParams } from "../../src";
+import { AddressZero } from "@ethersproject/constants";
 dotenv.config({ path: "env/.env" });
 
 export const web3EndpointsMainnet = {
@@ -39,32 +40,88 @@ export const contextParamsMainnet: ContextParams = {
     network: 215110,
     privateKey: TEST_WALLET,
     web3Provider: web3EndpointsMainnet.working,
-    relayEndpoint: relayEndpointsMainnet.working
+    relayEndpoint: relayEndpointsMainnet.working,
+    phoneLinkAddress: AddressZero,
+    tokenAddress: AddressZero,
+    validatorAddress: AddressZero,
+    currencyRateAddress: AddressZero,
+    shopAddress: AddressZero,
+    ledgerAddress: AddressZero,
+    loyaltyProviderAddress: AddressZero,
+    loyaltyConsumerAddress: AddressZero,
+    loyaltyExchangerAddress: AddressZero,
+    loyaltyTransferAddress: AddressZero,
+    loyaltyBridgeAddress: AddressZero
 };
 
 export const contextParamsTestnet: ContextParams = {
     network: 215115,
     privateKey: TEST_WALLET,
     web3Provider: web3EndpointsTestnet.working,
-    relayEndpoint: relayEndpointsTestnet.working
+    relayEndpoint: relayEndpointsTestnet.working,
+    phoneLinkAddress: AddressZero,
+    tokenAddress: AddressZero,
+    validatorAddress: AddressZero,
+    currencyRateAddress: AddressZero,
+    shopAddress: AddressZero,
+    ledgerAddress: AddressZero,
+    loyaltyProviderAddress: AddressZero,
+    loyaltyConsumerAddress: AddressZero,
+    loyaltyExchangerAddress: AddressZero,
+    loyaltyTransferAddress: AddressZero,
+    loyaltyBridgeAddress: AddressZero
 };
 
 export const contextParamsDevnet: ContextParams = {
     network: 24680,
     privateKey: TEST_WALLET,
     web3Provider: web3EndpointsDevnet.working,
-    relayEndpoint: relayEndpointsDevnet.working
+    relayEndpoint: relayEndpointsDevnet.working,
+    phoneLinkAddress: AddressZero,
+    tokenAddress: AddressZero,
+    validatorAddress: AddressZero,
+    currencyRateAddress: AddressZero,
+    shopAddress: AddressZero,
+    ledgerAddress: AddressZero,
+    loyaltyProviderAddress: AddressZero,
+    loyaltyConsumerAddress: AddressZero,
+    loyaltyExchangerAddress: AddressZero,
+    loyaltyTransferAddress: AddressZero,
+    loyaltyBridgeAddress: AddressZero
 };
 
 export const contextParamsLocalChain: ContextParams = {
     network: 24680,
     privateKey: TEST_WALLET,
     web3Provider: "http://localhost:8545",
-    relayEndpoint: "http://localhost:7070"
+    relayEndpoint: "http://localhost:7070",
+    phoneLinkAddress: AddressZero,
+    tokenAddress: AddressZero,
+    validatorAddress: AddressZero,
+    currencyRateAddress: AddressZero,
+    shopAddress: AddressZero,
+    ledgerAddress: AddressZero,
+    loyaltyProviderAddress: AddressZero,
+    loyaltyConsumerAddress: AddressZero,
+    loyaltyExchangerAddress: AddressZero,
+    loyaltyTransferAddress: AddressZero,
+    loyaltyBridgeAddress: AddressZero
 };
 
 export const contextParamsFailing: ContextParams = {
     network: 24680,
     privateKey: TEST_WALLET,
-    web3Provider: web3EndpointsMainnet.failing
+    web3Provider: web3EndpointsMainnet.failing,
+    relayEndpoint: relayEndpointsMainnet.failing,
+    phoneLinkAddress: AddressZero,
+    tokenAddress: AddressZero,
+    validatorAddress: AddressZero,
+    currencyRateAddress: AddressZero,
+    shopAddress: AddressZero,
+    ledgerAddress: AddressZero,
+    loyaltyProviderAddress: AddressZero,
+    loyaltyConsumerAddress: AddressZero,
+    loyaltyExchangerAddress: AddressZero,
+    loyaltyTransferAddress: AddressZero,
+    loyaltyBridgeAddress: AddressZero
 };
