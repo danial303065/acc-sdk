@@ -4,7 +4,7 @@
 node_modules
 dist
 coverage
-.env
+*.env
 .cache
 .DS_Store
 *.tgz

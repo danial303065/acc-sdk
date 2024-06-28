@@ -10,8 +10,9 @@ export interface IPhoneLink {
 export interface IPhoneLinkMethods extends IClientCore {
     isUp: () => Promise<boolean>;
     getEndpoint: (path: string) => Promise<URL>;
-    toAddress: (phone: string) => Promise<string>;
-    toPhoneNumber: (address: string) => Promise<string>;
+    getPhoneHash: (phone: string) => string;
+    toAddress: (phoneHash: string) => Promise<string>;
+    toPhoneHash: (address: string) => Promise<string>;
     register: (phone: string) => AsyncGenerator<PhoneLinkRegisterStepValue>;
     submit: (requestId: BytesLike, code: string) => AsyncGenerator<PhoneLinkSubmitStepValue>;
     getRegisterStatus: (id: BytesLike) => Promise<number>;

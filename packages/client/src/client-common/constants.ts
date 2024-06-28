@@ -4,7 +4,7 @@ import { Network } from "@ethersproject/networks";
 
 export const LIVE_CONTRACTS: { [K in SupportedNetwork]: NetworkDeployment } = {
     acc_mainnet: {
-        PhoneLinkCollectionAddress: activeContractsList.acc_mainnet.LoyaltyToken,
+        PhoneLinkCollectionAddress: activeContractsList.acc_mainnet.PhoneLinkCollection,
         LoyaltyTokenAddress: activeContractsList.acc_mainnet.LoyaltyToken,
         ValidatorAddress: activeContractsList.acc_mainnet.Validator,
         CurrencyRateAddress: activeContractsList.acc_mainnet.CurrencyRate,
@@ -16,11 +16,11 @@ export const LIVE_CONTRACTS: { [K in SupportedNetwork]: NetworkDeployment } = {
         LoyaltyTransferAddress: activeContractsList.acc_mainnet.LoyaltyTransfer,
         LoyaltyBridgeAddress: activeContractsList.acc_mainnet.LoyaltyBridge,
         network: 215110,
-        web3Endpoint: "https://rpc-side.main.acccoin.io/",
+        web3Endpoint: "https://rpc.main.acccoin.io/",
         relayEndpoint: "https://relay.main.acccoin.io/"
     },
     acc_testnet: {
-        PhoneLinkCollectionAddress: activeContractsList.acc_testnet.LoyaltyToken,
+        PhoneLinkCollectionAddress: activeContractsList.acc_testnet.PhoneLinkCollection,
         LoyaltyTokenAddress: activeContractsList.acc_testnet.LoyaltyToken,
         ValidatorAddress: activeContractsList.acc_testnet.Validator,
         CurrencyRateAddress: activeContractsList.acc_testnet.CurrencyRate,

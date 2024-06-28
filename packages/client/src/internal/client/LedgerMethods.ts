@@ -99,15 +99,15 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
     // region Balance
     /**
      * 포인트의 잔고를 리턴한다
-     * @param {string} phone - 전화번호 해시
+     * @param {string} phoneHash - 전화번호 해시
      * @return {Promise<BigNumber>} 포인트 잔고
      */
-    public async getUnPayablePointBalance(phone: string): Promise<BigNumber> {
+    public async getUnPayablePointBalance(phoneHash: string): Promise<BigNumber> {
         const provider = this.web3.getProvider() as Provider;
         if (!provider) throw new NoProviderError();
 
         const ledgerInstance: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), provider);
-        return await ledgerInstance.unPayablePointBalanceOf(phone);
+        return await ledgerInstance.unPayablePointBalanceOf(phoneHash);
     }
 
     /**
