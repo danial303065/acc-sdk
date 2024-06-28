@@ -211,17 +211,21 @@ export class PhoneLinkMethods extends ClientCore implements IPhoneLinkMethods {
         };
     }
 
-    public async toAddress(phone: string): Promise<string> {
+    public getPhoneHash(phone: string): string {
+        return ContractUtils.getPhoneHash(phone);
+    }
+
+    public async toAddress(phoneHash: string): Promise<string> {
         const provider = this.web3.getProvider();
         if (!provider) {
             throw new NoProviderError();
         }
 
         const contract = PhoneLinkCollection__factory.connect(this.web3.getLinkAddress(), provider);
-        return await contract.toAddress(phone);
+        return await contract.toAddress(phoneHash);
     }
 
-    public async toPhoneNumber(address: string): Promise<string> {
+    public async toPhoneHash(address: string): Promise<string> {
         const provider = this.web3.getProvider();
         if (!provider) {
             throw new NoProviderError();

@@ -31,7 +31,7 @@ export interface ILedger {
 export interface ILedgerMethods extends IClientCore {
     // Balance
     getBalanceOfLedger: (account: string) => Promise<IBalance>;
-    getUnPayablePointBalance: (phone: string) => Promise<BigNumber>;
+    getUnPayablePointBalance: (phoneHash: string) => Promise<BigNumber>;
     getPointBalance: (account: string) => Promise<BigNumber>;
     getTokenBalance: (account: string) => Promise<BigNumber>;
 

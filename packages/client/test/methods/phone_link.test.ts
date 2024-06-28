@@ -61,7 +61,7 @@ describe("SDK Client", () => {
     it("Check", async () => {
         const phoneHash = ContractUtils.getPhoneHash(userPhone);
         const address = await user.getAddress();
-        await expect(await client.link.toAddress(phoneHash)).toEqual(address);
-        await expect(await client.link.toPhoneNumber(address)).toEqual(phoneHash);
+        expect(await client.link.toAddress(phoneHash)).toEqual(address);
+        expect(await client.link.toPhoneHash(address)).toEqual(phoneHash);
     });
 });
