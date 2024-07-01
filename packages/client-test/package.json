@@ -21,7 +21,9 @@
         "61-link:get": "npx ts-node scripts/6-link/get.ts",
         "62-link:register": "npx ts-node scripts/6-link/register.ts",
         "63-link:change": "npx ts-node scripts/6-link/change.ts",
-        "71-convert:get": "npx ts-node scripts/7-convert/get.ts"
+        "71-convert:get": "npx ts-node scripts/7-convert/get.ts",
+        "81-bridge:withdrawal": "npx ts-node scripts/8-bridge/withdrawal.ts",
+        "82-bridge:deposit": "npx ts-node scripts/8-bridge/deposit.ts"
     },
     "directories": {
         "test": "test"
