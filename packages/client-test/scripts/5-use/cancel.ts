@@ -12,8 +12,10 @@ const beautify = require("beautify");
 async function main() {
     const userInfo = Helper.loadUserInfo();
     const shopInfo = Helper.loadShopInfo();
-    const contextParams: ContextParams = ContextBuilder.buildContextParams(Helper.NETWORK, userInfo.wallet.privateKey);
-    const context: Context = ContextBuilder.buildContext(Helper.NETWORK, userInfo.wallet.privateKey);
+    const contextParams = ContextBuilder.buildContextParams(Helper.NETWORK, userInfo.wallet.privateKey);
+    if (Helper.RELAY_ENDPOINT !== "") contextParams.relayEndpoint = Helper.RELAY_ENDPOINT;
+    if (Helper.WEB3_ENDPOINT !== "") contextParams.web3Provider = Helper.WEB3_ENDPOINT;
+    const context: Context = new Context(contextParams);
     const client = new Client(context);
 
     const paymentId = Helper.getPaymentId();
@@ -65,7 +67,7 @@ async function main() {
     await Helper.delay(3000);
 
     // Close Cancel
-    console.log("Close New");
+    console.log("Close Cancel");
     const url2 = URI(contextParams.relayEndpoint)
         .directory("/v1/payment/cancel")
         .filename("close")

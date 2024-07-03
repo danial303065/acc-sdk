@@ -3,7 +3,10 @@ import { Client, Context, ContextBuilder } from "acc-sdk-client-v2";
 
 async function main() {
     const userInfo = Helper.loadUserInfo();
-    const context: Context = ContextBuilder.buildContext(Helper.NETWORK, userInfo.wallet.privateKey);
+    const contextParams = ContextBuilder.buildContextParams(Helper.NETWORK, userInfo.wallet.privateKey);
+    if (Helper.RELAY_ENDPOINT !== "") contextParams.relayEndpoint = Helper.RELAY_ENDPOINT;
+    if (Helper.WEB3_ENDPOINT !== "") contextParams.web3Provider = Helper.WEB3_ENDPOINT;
+    const context: Context = new Context(contextParams);
     const client = new Client(context);
 
     const phoneHash = client.link.getPhoneHash(userInfo.phone);

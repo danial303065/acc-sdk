@@ -22,6 +22,8 @@ export class Helper {
     static RELAY_ACCESS_KEY = process.env.RELAY_ACCESS_KEY || "";
     static SAVE_ACCESS_KEY = process.env.SAVE_ACCESS_KEY || "";
     static SAVE_ENDPOINT = process.env.SAVE_ENDPOINT || "";
+    static RELAY_ENDPOINT = process.env.RELAY_ENDPOINT || "";
+    static WEB3_ENDPOINT = process.env.WEB3_ENDPOINT || "";
     static TEST_PK = "0xd09672244a06a32f74d051e5adbbb62ae0eda27832a973159d475da6d53ba5c0";
 
     public static loadUserInfo(): IUserInfo {

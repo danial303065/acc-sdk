@@ -3,7 +3,10 @@ import { Client, Context, ContextBuilder, NormalSteps } from "acc-sdk-client-v2"
 
 async function main() {
     const shopInfo = Helper.loadShopInfo();
-    const context: Context = ContextBuilder.buildContext(Helper.NETWORK, shopInfo.wallet.privateKey);
+    const contextParams = ContextBuilder.buildContextParams(Helper.NETWORK, shopInfo.wallet.privateKey);
+    if (Helper.RELAY_ENDPOINT !== "") contextParams.relayEndpoint = Helper.RELAY_ENDPOINT;
+    if (Helper.WEB3_ENDPOINT !== "") contextParams.web3Provider = Helper.WEB3_ENDPOINT;
+    const context: Context = new Context(contextParams);
     const client = new Client(context);
     console.log("상점 데이타를 추가합니다.");
 

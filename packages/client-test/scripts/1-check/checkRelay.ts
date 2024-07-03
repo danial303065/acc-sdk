@@ -5,6 +5,8 @@ const beautify = require("beautify");
 
 async function main() {
     const contextParams: ContextParams = ContextBuilder.buildContextParams(Helper.NETWORK, Helper.TEST_PK);
+    if (Helper.RELAY_ENDPOINT !== "") contextParams.relayEndpoint = Helper.RELAY_ENDPOINT;
+    if (Helper.WEB3_ENDPOINT !== "") contextParams.web3Provider = Helper.WEB3_ENDPOINT;
     console.log(beautify(JSON.stringify(contextParams), { format: "json" }));
 
     const context: Context = ContextBuilder.buildContext(Helper.NETWORK, Helper.TEST_PK);
