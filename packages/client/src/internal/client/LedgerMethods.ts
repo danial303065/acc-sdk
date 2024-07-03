@@ -824,6 +824,28 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
     }
 
     /**
+     * 모바일의 정보를 등록한다
+     * @param type
+     */
+    public async isExistsMobileToken(type: MobileType = MobileType.USER_APP): Promise<boolean> {
+        const signer = this.web3.getConnectedSigner();
+        if (!signer) {
+            throw new NoSignerError();
+        } else if (!signer.provider) {
+            throw new NoProviderError();
+        }
+
+        const res = await Network.get(await this.relay.getEndpoint(`/v1/mobile/exists/${await signer.getAddress()}`), {
+            type
+        });
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+
+        return res.data.exists;
+    }
+
+    /**
      * 등록된 모바일의 정보를 폐기한다
      * @return {AsyncGenerator<RemovePhoneInfoStepValue>}
      */
