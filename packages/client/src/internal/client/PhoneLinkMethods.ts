@@ -31,6 +31,12 @@ export class PhoneLinkMethods extends ClientCore implements IPhoneLinkMethods {
         Object.freeze(this);
     }
 
+    public async getAccount(): Promise<string> {
+        const signer = this.web3.getConnectedSigner();
+        if (!signer) throw new NoSignerError();
+        return await signer.getAddress();
+    }
+
     /**
      * 검증자가 정상적인 상태인지 검사한다.
      * @return {Promise<boolean>} 이 값이 true 이면 릴레이 서버가 정상이다.

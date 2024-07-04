@@ -77,6 +77,12 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
         Object.freeze(this);
     }
 
+    public async getAccount(): Promise<string> {
+        const signer = this.web3.getConnectedSigner();
+        if (!signer) throw new NoSignerError();
+        return await signer.getAddress();
+    }
+
     public async getBalanceOfLedger(account: string): Promise<IBalance> {
         const res = await Network.get(await this.relay.getEndpoint(`/v1/ledger/balance/account/${account}`));
         if (res.code !== 0 || res.data === undefined) {

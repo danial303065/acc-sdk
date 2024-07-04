@@ -38,6 +38,12 @@ export class ShopMethods extends ClientCore implements IShopMethods {
         Object.freeze(this);
     }
 
+    public async getAccount(): Promise<string> {
+        const signer = this.web3.getConnectedSigner();
+        if (!signer) throw new NoSignerError();
+        return await signer.getAddress();
+    }
+
     // region Common
     /**
      * 상점의 정보를 제공한다.

@@ -8,6 +8,7 @@ export interface IPhoneLink {
 
 /** Defines the shape of the general purpose Client class */
 export interface IPhoneLinkMethods extends IClientCore {
+    getAccount: () => Promise<string>;
     isUp: () => Promise<boolean>;
     getEndpoint: (path: string) => Promise<URL>;
     getPhoneHash: (phone: string) => string;

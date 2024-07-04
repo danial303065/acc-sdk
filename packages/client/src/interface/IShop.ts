@@ -19,6 +19,7 @@ export interface IShop {
 
 /** Defines the shape of the general purpose Client class */
 export interface IShopMethods extends IClientCore {
+    getAccount: () => Promise<string>;
     // Common
     getShopInfo: (shopId: BytesLike) => Promise<ShopData>;
 
