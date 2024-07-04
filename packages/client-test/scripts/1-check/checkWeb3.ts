@@ -9,7 +9,7 @@ async function main() {
     if (Helper.WEB3_ENDPOINT !== "") contextParams.web3Provider = Helper.WEB3_ENDPOINT;
     console.log(beautify(JSON.stringify(contextParams), { format: "json" }));
 
-    const context: Context = ContextBuilder.buildContext(Helper.NETWORK, Helper.TEST_PK);
+    const context: Context = new Context(contextParams);
     const client = new Client(context);
 
     const web3Status = await client.web3.isUp();

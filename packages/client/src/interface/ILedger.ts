@@ -29,6 +29,8 @@ export interface ILedger {
 
 /** Defines the shape of the general purpose Client class */
 export interface ILedgerMethods extends IClientCore {
+    getAccount: () => Promise<string>;
+
     // Balance
     getBalanceOfLedger: (account: string) => Promise<IBalance>;
     getUnPayablePointBalance: (phoneHash: string) => Promise<BigNumber>;

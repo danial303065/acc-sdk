@@ -30,7 +30,8 @@
         "71-convert:get": "npx ts-node scripts/7-convert/get.ts",
         "81-bridge:withdrawal": "npx ts-node scripts/8-bridge/withdrawal.ts",
         "82-bridge:deposit": "npx ts-node scripts/8-bridge/deposit.ts",
-        "91-mobile:exists": "npx ts-node scripts/9-mobile/exists.ts"
+        "91-mobile:exists": "npx ts-node scripts/9-mobile/exists.ts",
+        "10-account:check": "npx ts-node scripts/10-account/check.ts"
     },
     "directories": {
         "test": "test"
@@ -47,11 +48,12 @@
     "homepage": "https://github.com/danial303065/acc-sdk-test#readme",
     "devDependencies": {
         "@ethersproject/bignumber": "^5.7.0",
+        "@ethersproject/wallet": "^5.7.0",
         "@types/chai": "^4.3.5",
         "@types/mocha": "^10.0.0",
         "@types/node": "^12.20.43",
         "@types/urijs": "^1.19.12",
-        "acc-sdk-client-v2": "~2.4.1",
+        "acc-sdk-client-v2": "~2.4.2",
         "assert": "^2.0.0",
         "axios": "^1.6.7",
         "beautify": "^0.0.8",

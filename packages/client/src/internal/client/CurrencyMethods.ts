@@ -2,7 +2,7 @@ import { ClientCore, Context } from "../../client-common";
 import { ICurrencyMethods } from "../../interface/ICurrency";
 import { CurrencyRate, CurrencyRate__factory, LoyaltyToken, LoyaltyToken__factory } from "acc-contracts-lib-v2";
 import { Provider } from "@ethersproject/providers";
-import { NoProviderError } from "acc-sdk-common-v2";
+import { NoProviderError, NoSignerError } from "acc-sdk-common-v2";
 import { BigNumber } from "@ethersproject/bignumber";
 import { ContractUtils } from "../../utils/ContractUtils";
 
@@ -14,6 +14,12 @@ export class CurrencyMethods extends ClientCore implements ICurrencyMethods {
         super(context);
         Object.freeze(CurrencyMethods.prototype);
         Object.freeze(this);
+    }
+
+    public async getAccount(): Promise<string> {
+        const signer = this.web3.getConnectedSigner();
+        if (!signer) throw new NoSignerError();
+        return await signer.getAddress();
     }
 
     /**

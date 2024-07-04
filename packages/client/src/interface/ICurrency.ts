@@ -7,6 +7,7 @@ export interface ICurrency {
 
 /** Defines the shape of the general purpose Client class */
 export interface ICurrencyMethods extends IClientCore {
+    getAccount: () => Promise<string>;
     getRate: (currency: string) => Promise<BigNumber>;
     getMultiple: () => Promise<BigNumber>;
     getTokenSymbol: () => Promise<string>;
