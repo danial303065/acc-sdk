@@ -106,8 +106,10 @@ export class RelayModule implements IClientRelayCore {
                 name: res.data.network.name,
                 chainId: res.data.network.chainId,
                 ensAddress: res.data.network.ensAddress,
-                transferFee: BigNumber.from(res.data.network.transferFee),
-                bridgeFee: BigNumber.from(res.data.network.bridgeFee)
+                chainTransferFee: BigNumber.from(res.data.network.chainTransferFee),
+                chainBridgeFee: BigNumber.from(res.data.network.chainBridgeFee),
+                loyaltyTransferFee: BigNumber.from(res.data.network.loyaltyTransferFee),
+                loyaltyBridgeFee: BigNumber.from(res.data.network.loyaltyBridgeFee)
             },
             contract: {
                 token: res.data.contract.token,
@@ -180,8 +182,10 @@ export class RelayModule implements IClientRelayCore {
                 name: res.data.network.name,
                 chainId: res.data.network.chainId,
                 ensAddress: res.data.network.ensAddress,
-                transferFee: BigNumber.from(res.data.network.transferFee),
-                bridgeFee: BigNumber.from(res.data.network.bridgeFee)
+                chainTransferFee: BigNumber.from(res.data.network.chainTransferFee),
+                chainBridgeFee: BigNumber.from(res.data.network.chainBridgeFee),
+                loyaltyTransferFee: BigNumber.from(res.data.network.loyaltyTransferFee),
+                loyaltyBridgeFee: BigNumber.from(res.data.network.loyaltyBridgeFee)
             },
             contract: {
                 token: res.data.contract.token,

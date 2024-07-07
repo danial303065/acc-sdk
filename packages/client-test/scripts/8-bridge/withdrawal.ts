@@ -22,6 +22,8 @@ async function main() {
 
     const mainChainInfo = await client.ledger.getChainInfoOfMainChain();
     const amount = Amount.make(100, 18).value;
+
+    console.log("Amount     : ", new BOACoin(amount).toDisplayString(true, 4));
     let depositId: string = "";
     for await (const step of client.ledger.withdrawViaBridge(amount)) {
         switch (step.key) {

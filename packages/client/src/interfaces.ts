@@ -594,8 +594,10 @@ export interface IChainInfo {
         name: string;
         chainId: number;
         ensAddress: string;
-        transferFee: BigNumber;
-        bridgeFee: BigNumber;
+        chainTransferFee: BigNumber;
+        chainBridgeFee: BigNumber;
+        loyaltyTransferFee: BigNumber;
+        loyaltyBridgeFee: BigNumber;
     };
     contract: {
         token: string;
@@ -604,8 +606,18 @@ export interface IChainInfo {
     };
 }
 
+export interface ITokenInfo {
+    symbol: string;
+    name: string;
+    decimals: number;
+}
+
+export interface IExchangeRate {
+    point: BigNumber;
+    token: BigNumber;
+}
+
 export interface IBalance {
-    account: string;
     point: {
         balance: BigNumber;
         value: BigNumber;
@@ -614,4 +626,13 @@ export interface IBalance {
         balance: BigNumber;
         value: BigNumber;
     };
+}
+
+export interface IAccountBalances {
+    account: string;
+    tokenInfo: ITokenInfo;
+    exchangeRate: IExchangeRate;
+    ledger: IBalance;
+    mainChain: IBalance;
+    sideChain: IBalance;
 }

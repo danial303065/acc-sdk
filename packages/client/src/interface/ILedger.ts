@@ -17,7 +17,7 @@ import {
     WithdrawStepValue,
     WithdrawViaBridgeStepValue,
     LedgerAction,
-    IBalance
+    IAccountBalances
 } from "../interfaces";
 import { BigNumber } from "@ethersproject/bignumber";
 import { BytesLike } from "@ethersproject/bytes";
@@ -32,10 +32,10 @@ export interface ILedgerMethods extends IClientCore {
     getAccount: () => Promise<string>;
 
     // Balance
-    getBalanceOfLedger: (account: string) => Promise<IBalance>;
     getUnPayablePointBalance: (phoneHash: string) => Promise<BigNumber>;
     getPointBalance: (account: string) => Promise<BigNumber>;
     getTokenBalance: (account: string) => Promise<BigNumber>;
+    getAccountBalances: (account: string) => Promise<IAccountBalances>;
 
     // Payment
     getFeeRate: () => Promise<number>;

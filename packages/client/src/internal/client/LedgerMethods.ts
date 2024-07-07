@@ -44,7 +44,7 @@ import {
     WaiteBridgeStepValue,
     WaiteBridgeSteps,
     LedgerAction,
-    IBalance
+    IAccountBalances
 } from "../../interfaces";
 import {
     AmountMismatchError,
@@ -83,26 +83,57 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
         return await signer.getAddress();
     }
 
-    public async getBalanceOfLedger(account: string): Promise<IBalance> {
-        const res = await Network.get(await this.relay.getEndpoint(`/v1/ledger/balance/account/${account}`));
+    // region Balance
+    public async getAccountBalances(account: string): Promise<IAccountBalances> {
+        const res = await Network.get(await this.relay.getEndpoint(`/v1/account/balance/${account}`));
         if (res.code !== 0 || res.data === undefined) {
             throw new InternalServerError(res?.error?.message ?? "");
         }
 
         return {
             account: String(res.data.account),
-            point: {
-                balance: BigNumber.from(res.data.point.balance),
-                value: BigNumber.from(res.data.point.value)
+            tokenInfo: {
+                symbol: res.data.tokenInfo.symbol,
+                name: res.data.tokenInfo.name,
+                decimals: res.data.tokenInfo.decimals
             },
-            token: {
-                balance: BigNumber.from(res.data.token.balance),
-                value: BigNumber.from(res.data.token.value)
+            exchangeRate: {
+                point: BigNumber.from(res.data.exchangeRate.point),
+                token: BigNumber.from(res.data.exchangeRate.token)
+            },
+            ledger: {
+                point: {
+                    balance: BigNumber.from(res.data.ledger.point.balance),
+                    value: BigNumber.from(res.data.ledger.point.value)
+                },
+                token: {
+                    balance: BigNumber.from(res.data.ledger.token.balance),
+                    value: BigNumber.from(res.data.ledger.token.value)
+                }
+            },
+            mainChain: {
+                point: {
+                    balance: BigNumber.from(res.data.mainChain.point.balance),
+                    value: BigNumber.from(res.data.mainChain.point.value)
+                },
+                token: {
+                    balance: BigNumber.from(res.data.mainChain.token.balance),
+                    value: BigNumber.from(res.data.mainChain.token.value)
+                }
+            },
+            sideChain: {
+                point: {
+                    balance: BigNumber.from(res.data.sideChain.point.balance),
+                    value: BigNumber.from(res.data.sideChain.point.value)
+                },
+                token: {
+                    balance: BigNumber.from(res.data.sideChain.token.balance),
+                    value: BigNumber.from(res.data.sideChain.token.value)
+                }
             }
         };
     }
 
-    // region Balance
     /**
      * 포인트의 잔고를 리턴한다
      * @param {string} phoneHash - 전화번호 해시
@@ -153,7 +184,7 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
         if (!provider) throw new NoProviderError();
 
         const ledgerInstance: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), provider);
-        return await ledgerInstance.getFee();
+        return await ledgerInstance.getPaymentFee();
     }
 
     public async getTemporaryAccount(): Promise<string> {
@@ -1090,12 +1121,13 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
                     tokenId: withdrawInfo.tokenId
                 };
                 break;
+            } else {
+                if (ContractUtils.getTimeStamp() - start > timeout) {
+                    yield { key: WaiteBridgeSteps.TIMEOUT };
+                    return;
+                }
+                await ContractUtils.delay(1000);
             }
-            if (ContractUtils.getTimeStamp() - start > timeout) {
-                yield { key: WaiteBridgeSteps.TIMEOUT };
-                return;
-            }
-            await ContractUtils.delay(1000);
         }
         await ContractUtils.delay(1000);
         yield { key: WaiteBridgeSteps.DONE };
@@ -1213,22 +1245,13 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
                     tokenId: withdrawInfo.tokenId
                 };
                 break;
+            } else {
+                if (ContractUtils.getTimeStamp() - start > timeout) {
+                    yield { key: WaiteBridgeSteps.TIMEOUT };
+                    return;
+                }
+                await ContractUtils.delay(1000);
             }
-            if (ContractUtils.getTimeStamp() - start > timeout) {
-                yield { key: WaiteBridgeSteps.TIMEOUT };
-                return;
-            }
-            await ContractUtils.delay(1000);
-        }
-        const block1 = await provider.getBlock("latest");
-        while (true) {
-            const block2 = await provider.getBlock("latest");
-            if (block2.number > block1.number) break;
-            if (ContractUtils.getTimeStamp() - start > timeout) {
-                yield { key: WaiteBridgeSteps.TIMEOUT };
-                return;
-            }
-            await ContractUtils.delay(1000);
         }
         yield { key: WaiteBridgeSteps.DONE };
     }

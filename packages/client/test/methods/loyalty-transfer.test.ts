@@ -59,7 +59,7 @@ describe("LoyaltyTransfer", () => {
 
     it("Test of the transfer", async () => {
         const chainInfo = await client.ledger.getChainInfoOfSideChain();
-        const fee = chainInfo.network.transferFee;
+        const fee = chainInfo.network.loyaltyTransferFee;
         const amount = Amount.make(100, 18).value;
         const oldBalance0 = await client.ledger.getTokenBalance(users[0].address);
         const oldBalance1 = await client.ledger.getTokenBalance(users[1].address);
