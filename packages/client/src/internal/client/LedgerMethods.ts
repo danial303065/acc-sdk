@@ -44,7 +44,7 @@ import {
     WaiteBridgeStepValue,
     WaiteBridgeSteps,
     LedgerAction,
-    IAccountBalances
+    IAccountSummary
 } from "../../interfaces";
 import {
     AmountMismatchError,
@@ -84,8 +84,8 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
     }
 
     // region Balance
-    public async getAccountBalances(account: string): Promise<IAccountBalances> {
-        const res = await Network.get(await this.relay.getEndpoint(`/v1/account/balance/${account}`));
+    public async getSummary(account: string): Promise<IAccountSummary> {
+        const res = await Network.get(await this.relay.getEndpoint(`/v1/summary/account/${account}`));
         if (res.code !== 0 || res.data === undefined) {
             throw new InternalServerError(res?.error?.message ?? "");
         }
@@ -98,8 +98,14 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
                 decimals: res.data.tokenInfo.decimals
             },
             exchangeRate: {
-                point: BigNumber.from(res.data.exchangeRate.point),
-                token: BigNumber.from(res.data.exchangeRate.token)
+                token: {
+                    symbol: res.data.exchangeRate.token.symbol,
+                    value: BigNumber.from(res.data.exchangeRate.token.value)
+                },
+                currency: {
+                    symbol: res.data.exchangeRate.currency.symbol,
+                    value: BigNumber.from(res.data.exchangeRate.currency.value)
+                }
             },
             ledger: {
                 point: {
@@ -130,6 +136,11 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
                     balance: BigNumber.from(res.data.sideChain.token.balance),
                     value: BigNumber.from(res.data.sideChain.token.value)
                 }
+            },
+            protocolFees: {
+                transfer: BigNumber.from(res.data.protocolFees.transfer),
+                withdraw: BigNumber.from(res.data.protocolFees.withdraw),
+                deposit: BigNumber.from(res.data.protocolFees.deposit)
             }
         };
     }

@@ -9,7 +9,8 @@ import {
     RemoveDelegateStepValue,
     RefundShopStepValue,
     ShopAction,
-    ShopRefundableData
+    ShopRefundableData,
+    IShopSummary
 } from "../interfaces";
 import { BytesLike } from "@ethersproject/bytes";
 
@@ -22,6 +23,8 @@ export interface IShopMethods extends IClientCore {
     getAccount: () => Promise<string>;
     // Common
     getShopInfo: (shopId: BytesLike) => Promise<ShopData>;
+
+    getSummary: (shopId: BytesLike) => Promise<IShopSummary>;
 
     // Add
     isAvailableId: (shopId: BytesLike) => Promise<boolean>;

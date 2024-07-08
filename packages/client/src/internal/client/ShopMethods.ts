@@ -15,7 +15,8 @@ import {
     RemoveDelegateStepValue,
     RefundShopStepValue,
     ShopAction,
-    ShopRefundableData
+    ShopRefundableData,
+    IShopSummary
 } from "../../interfaces";
 import { FailedAddShopError, FailedApprovePayment, InternalServerError } from "../../utils/errors";
 import { Network } from "../../client-common/interfaces/network";
@@ -73,6 +74,78 @@ export class ShopMethods extends ClientCore implements IShopMethods {
         };
     }
 
+    public async getSummary(shopId: BytesLike): Promise<IShopSummary> {
+        const res = await Network.get(await this.relay.getEndpoint(`/v1/summary/shop/${shopId}`));
+        if (res.code !== 0 || res.data === undefined) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+
+        return {
+            shopInfo: {
+                shopId: res.data.shopInfo.shopId,
+                name: res.data.shopInfo.name,
+                currency: res.data.shopInfo.currency,
+                status: res.data.shopInfo.status,
+                account: res.data.shopInfo.account,
+                delegator: res.data.shopInfo.delegator,
+                providedAmount: BigNumber.from(res.data.shopInfo.providedAmount),
+                usedAmount: BigNumber.from(res.data.shopInfo.usedAmount),
+                refundedAmount: BigNumber.from(res.data.shopInfo.refundedAmount),
+                refundableAmount: BigNumber.from(res.data.shopInfo.refundableAmount),
+                refundableToken: BigNumber.from(res.data.shopInfo.refundableToken)
+            },
+            tokenInfo: {
+                symbol: res.data.tokenInfo.symbol,
+                name: res.data.tokenInfo.name,
+                decimals: res.data.tokenInfo.decimals
+            },
+            exchangeRate: {
+                token: {
+                    symbol: res.data.exchangeRate.token.symbol,
+                    value: BigNumber.from(res.data.exchangeRate.token.value)
+                },
+                currency: {
+                    symbol: res.data.exchangeRate.currency.symbol,
+                    value: BigNumber.from(res.data.exchangeRate.currency.value)
+                }
+            },
+            ledger: {
+                point: {
+                    balance: BigNumber.from(res.data.ledger.point.balance),
+                    value: BigNumber.from(res.data.ledger.point.value)
+                },
+                token: {
+                    balance: BigNumber.from(res.data.ledger.token.balance),
+                    value: BigNumber.from(res.data.ledger.token.value)
+                }
+            },
+            mainChain: {
+                point: {
+                    balance: BigNumber.from(res.data.mainChain.point.balance),
+                    value: BigNumber.from(res.data.mainChain.point.value)
+                },
+                token: {
+                    balance: BigNumber.from(res.data.mainChain.token.balance),
+                    value: BigNumber.from(res.data.mainChain.token.value)
+                }
+            },
+            sideChain: {
+                point: {
+                    balance: BigNumber.from(res.data.sideChain.point.balance),
+                    value: BigNumber.from(res.data.sideChain.point.value)
+                },
+                token: {
+                    balance: BigNumber.from(res.data.sideChain.token.balance),
+                    value: BigNumber.from(res.data.sideChain.token.value)
+                }
+            },
+            protocolFees: {
+                transfer: BigNumber.from(res.data.protocolFees.transfer),
+                withdraw: BigNumber.from(res.data.protocolFees.withdraw),
+                deposit: BigNumber.from(res.data.protocolFees.deposit)
+            }
+        };
+    }
     // endregion
 
     // region Add

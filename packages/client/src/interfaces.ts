@@ -613,8 +613,14 @@ export interface ITokenInfo {
 }
 
 export interface IExchangeRate {
-    point: BigNumber;
-    token: BigNumber;
+    token: {
+        symbol: string;
+        value: BigNumber;
+    };
+    currency: {
+        symbol: string;
+        value: BigNumber;
+    };
 }
 
 export interface IBalance {
@@ -628,11 +634,42 @@ export interface IBalance {
     };
 }
 
-export interface IAccountBalances {
+export interface IProtocolFees {
+    transfer: BigNumber;
+    withdraw: BigNumber;
+    deposit: BigNumber;
+}
+
+export interface IShopInfo {
+    shopId: string;
+    name: string;
+    currency: string;
+    status: number;
+    account: string;
+    delegator: string;
+    providedAmount: BigNumber;
+    usedAmount: BigNumber;
+    refundedAmount: BigNumber;
+    refundableAmount: BigNumber;
+    refundableToken: BigNumber;
+}
+
+export interface IAccountSummary {
     account: string;
     tokenInfo: ITokenInfo;
     exchangeRate: IExchangeRate;
     ledger: IBalance;
     mainChain: IBalance;
     sideChain: IBalance;
+    protocolFees: IProtocolFees;
+}
+
+export interface IShopSummary {
+    shopInfo: IShopInfo;
+    tokenInfo: ITokenInfo;
+    exchangeRate: IExchangeRate;
+    ledger: IBalance;
+    mainChain: IBalance;
+    sideChain: IBalance;
+    protocolFees: IProtocolFees;
 }
