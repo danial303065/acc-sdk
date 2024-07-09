@@ -27,6 +27,12 @@ export class BadRequestError extends NetworkError {
     }
 }
 
+export class InvalidPhoneNumber extends Error {
+    constructor() {
+        super("Invalid phone number");
+    }
+}
+
 export class InvalidPhoneParamError extends Error {
     constructor() {
         super("The param does not phone");

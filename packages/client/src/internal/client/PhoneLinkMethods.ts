@@ -17,8 +17,10 @@ import { Network } from "../../client-common/interfaces/network";
 
 import { BytesLike } from "@ethersproject/bytes";
 
-import { FailedRemovePhoneInfoError, InternalServerError, NoValidator } from "../../utils/errors";
+import { FailedRemovePhoneInfoError, InternalServerError, InvalidPhoneNumber, NoValidator } from "../../utils/errors";
 import { ContractTransaction } from "@ethersproject/contracts";
+
+import { PhoneNumberFormat, PhoneNumberUtil } from "google-libphonenumber";
 
 /**
  * 사용자의 전화번화와 지갑주소를 링크하여 스마트컨트랙트에 저장하는 기능이 포함되어 있다.
@@ -94,10 +96,17 @@ export class PhoneLinkMethods extends ClientCore implements IPhoneLinkMethods {
             throw new NoProviderError();
         }
 
+        const phoneUtil = PhoneNumberUtil.getInstance();
+        const number = phoneUtil.parseAndKeepRawInput(phone, "ZZ");
+        if (!phoneUtil.isValidNumber(number)) {
+            throw new InvalidPhoneNumber();
+        }
+        const reformattedPhoneNumber = phoneUtil.format(number, PhoneNumberFormat.INTERNATIONAL);
+
         const contract = PhoneLinkCollection__factory.connect(this.web3.getLinkAddress(), signer);
         const address = await signer.getAddress();
         const nonce = await contract.nonceOf(address);
-        const phoneHash = ContractUtils.getPhoneHash(phone);
+        const phoneHash = ContractUtils.getPhoneHash(reformattedPhoneNumber);
         const msg = ContractUtils.getRequestMessage(phoneHash, address, nonce, this.web3.getChainId());
         const signature = await ContractUtils.signMessage(signer, msg);
         const param = { phone, address, signature };
@@ -110,7 +119,7 @@ export class PhoneLinkMethods extends ClientCore implements IPhoneLinkMethods {
         yield {
             key: PhoneLinkRegisterSteps.SENDING,
             requestId: res.data.requestId,
-            phone,
+            phone: reformattedPhoneNumber,
             address
         };
 
@@ -147,7 +156,7 @@ export class PhoneLinkMethods extends ClientCore implements IPhoneLinkMethods {
         yield {
             key,
             requestId: res.data.requestId,
-            phone,
+            phone: reformattedPhoneNumber,
             address
         };
     }

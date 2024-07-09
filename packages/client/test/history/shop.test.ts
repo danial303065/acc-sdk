@@ -1,5 +1,4 @@
 import { Amount, Client, Context, ContractUtils, NormalSteps, ShopAction } from "../../src";
-import { Wallet } from "@ethersproject/wallet";
 
 // @ts-ignore
 import fs from "fs";

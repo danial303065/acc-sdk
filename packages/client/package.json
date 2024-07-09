@@ -1,6 +1,6 @@
 {
   "name": "acc-sdk-client-v2",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "author": "BOSagora Foundation",
   "license": "AGPL-3.0-or-later",
   "main": "dist/index.js",
@@ -68,6 +68,7 @@
     "typescript": "^4.6.2"
   },
   "dependencies": {
+    "@types/google-libphonenumber": "^7.4.30",
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/abstract-signer": "^5.7.0",
     "@ethersproject/bignumber": "^5.7.0",
@@ -82,6 +83,7 @@
     "@ethersproject/wallet": "^5.7.0",
     "acc-contracts-lib-v2": "~2.3.1",
     "acc-sdk-common-v2": "~2.0.0",
+    "google-libphonenumber": "^3.2.35",
     "unfetch": "~4.2.0"
   },
   "jest": {

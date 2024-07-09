@@ -17,6 +17,8 @@ import { keccak256 } from "@ethersproject/keccak256";
 import { verifyMessage } from "@ethersproject/wallet";
 import { randomBytes } from "@ethersproject/random";
 import { LoyaltyNetworkID } from "../interfaces";
+import { PhoneNumberFormat, PhoneNumberUtil } from "google-libphonenumber";
+import { InvalidPhoneNumber } from "./errors";
 
 export class ContractUtils {
     /**
@@ -52,7 +54,16 @@ export class ContractUtils {
     }
 
     public static getPhoneHash(phone: string): string {
-        const encodedResult = defaultAbiCoder.encode(["string", "string"], ["BOSagora Phone Number", phone]);
+        const phoneUtil = PhoneNumberUtil.getInstance();
+        const number = phoneUtil.parseAndKeepRawInput(phone, "ZZ");
+        if (!phoneUtil.isValidNumber(number)) {
+            throw new InvalidPhoneNumber();
+        }
+        const reformattedPhoneNumber = phoneUtil.format(number, PhoneNumberFormat.INTERNATIONAL);
+        const encodedResult = defaultAbiCoder.encode(
+            ["string", "string"],
+            ["BOSagora Phone Number", reformattedPhoneNumber]
+        );
         return keccak256(encodedResult);
     }
 
@@ -470,7 +481,7 @@ export class ContractUtils {
                     elem.account,
                     elem.phone,
                     elem.sender,
-                    chainId,
+                    chainId
                 ]
             );
             messages.push(keccak256(encodedData));
