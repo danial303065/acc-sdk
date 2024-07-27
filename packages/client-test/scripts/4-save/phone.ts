@@ -27,7 +27,7 @@ async function main() {
         const details: INewPurchaseDetails[] = [
             {
                 productId: "2020051310000000",
-                amount: 100_000_000,
+                amount: 10_000,
                 providePercent: 10,
             },
         ];
