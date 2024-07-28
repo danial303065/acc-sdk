@@ -1968,10 +1968,10 @@ abbrev@^2.0.0:
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-2.0.0.tgz#cf59829b8b4f03f89dda2771cb7f3653828c89bf"
   integrity sha512-6/mh1E2u2YgEsCHdY0Yx5oW+61gZU+1vXaoiHHrpKeuRNNgFvS+/jrwHiQhB5apAf5oB7UB7E19ol2R2LKH8hQ==
 
-acc-contracts-lib-v2@~2.4.0:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/acc-contracts-lib-v2/-/acc-contracts-lib-v2-2.4.0.tgz#eeec703b291f167dc8fc76072f8b225f3efb9f87"
-  integrity sha512-3wlE4J3RA5cHMGS3fMCQY3SfIaM7bHh/KRUaRXL0ZWcbXf6HvMDi+l15DUcGfSKKDepwcbQpUthPFn1ez+VIjg==
+acc-contracts-lib-v2@~2.5.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/acc-contracts-lib-v2/-/acc-contracts-lib-v2-2.5.0.tgz#2a1cfa376c5915e3a11545fcdc954376bbeec578"
+  integrity sha512-EUhHCcwAYAsjw4LE2zf2MbtdMiI8Ugk80LoNEg3eJGpnFr5w1BT2nIoAgIKkK1H5znSXk7UVpngjeyv2xkLhKA==
   dependencies:
     ethers "5.7.0"
 
