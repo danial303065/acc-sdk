@@ -10,7 +10,7 @@ async function main() {
     const context: Context = new Context(contextParams);
     const client = new Client(context);
 
-    const amount = BOACoin.make("10_000");
+    const amount = BOACoin.make("1_000");
     for await (const step of client.ledger.exchangePointToToken(amount.value)) {
         switch (step.key) {
             case NormalSteps.PREPARED:
