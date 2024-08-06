@@ -3,13 +3,13 @@ import { SupportedNetwork, SupportedNetworkArray } from "./interfaces/common";
 import { InvalidAddressError, UnsupportedProtocolError, UnsupportedNetworkError } from "acc-sdk-common-v2";
 import { getNetwork } from "../utils/Utilty";
 import { LIVE_CONTRACTS } from "./constants";
-export { ContextParams } from "./interfaces/context";
 
 import { isAddress } from "@ethersproject/address";
 import { Network } from "@ethersproject/networks";
 import { JsonRpcProvider, Networkish } from "@ethersproject/providers";
 import { AddressZero } from "@ethersproject/constants";
 import { Wallet } from "@ethersproject/wallet";
+export { ContextParams } from "./interfaces/context";
 
 const supportedProtocols = ["https:", "http:"];
 // if (typeof process !== "undefined" && process.env?.TESTING) {

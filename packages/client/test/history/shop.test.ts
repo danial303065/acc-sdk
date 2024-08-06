@@ -102,18 +102,28 @@ describe("Integrated test of Shop", () => {
                 const loyaltyAmount = purchaseAmount.mul(5).div(100);
                 const phoneHash = ContractUtils.getPhoneHash("");
                 const foundation = await accounts[AccountIndex.FOUNDATION].getAddress();
-                const purchaseParams = users.map((m) => {
-                    return {
-                        purchaseId: NodeInfo.getPurchaseId(),
-                        amount: purchaseAmount,
-                        loyalty: loyaltyAmount,
-                        currency: "php",
-                        shopId: shops[0].shopId,
-                        account: m.address,
-                        phone: phoneHash,
-                        sender: foundation
-                    };
-                });
+
+                const purchaseParams = await Promise.all(
+                    users.map(async (m) => {
+                        const purchaseItem = {
+                            purchaseId: NodeInfo.getPurchaseId(),
+                            amount: purchaseAmount,
+                            loyalty: loyaltyAmount,
+                            currency: "php",
+                            shopId: shops[0].shopId,
+                            account: m.address,
+                            phone: phoneHash,
+                            sender: foundation,
+                            signature: ""
+                        };
+                        purchaseItem.signature = await ContractUtils.getPurchaseSignature(
+                            accounts[AccountIndex.FOUNDATION],
+                            purchaseItem,
+                            NodeInfo.getChainId()
+                        );
+                        return purchaseItem;
+                    })
+                );
                 const purchaseMessage = ContractUtils.getPurchasesMessage(0, purchaseParams, NodeInfo.getChainId());
                 const signatures = await Promise.all(
                     validatorWallets.map((m) => ContractUtils.signMessage(m, purchaseMessage))
