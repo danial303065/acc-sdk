@@ -1,17 +1,16 @@
 import { Helper } from "../utils";
-import { BOACoin } from "../../src/Amount";
 import { Client, Context, ContextBuilder, NormalSteps } from "acc-sdk-client-v2";
 
 async function main() {
-    const userInfo = Helper.loadUserInfo();
-    const contextParams = ContextBuilder.buildContextParams(Helper.NETWORK, userInfo.wallet.privateKey);
+    const shopInfo = Helper.loadShopInfo();
+    const contextParams = ContextBuilder.buildContextParams(Helper.NETWORK, shopInfo.wallet.privateKey);
     if (Helper.RELAY_ENDPOINT !== "") contextParams.relayEndpoint = Helper.RELAY_ENDPOINT;
     if (Helper.WEB3_ENDPOINT !== "") contextParams.web3Provider = Helper.WEB3_ENDPOINT;
     const context: Context = new Context(contextParams);
     const client = new Client(context);
+    console.log("상점 데이타를 추가합니다.");
 
-    const amount = BOACoin.make("1_000");
-    for await (const step of client.ledger.exchangePointToToken(amount.value)) {
+    for await (const step of client.shop.add(shopInfo.shopId, "Shop New 10", "php")) {
         switch (step.key) {
             case NormalSteps.PREPARED:
                 console.log("NormalSteps.PREPARED");
@@ -23,7 +22,7 @@ async function main() {
                 console.log("NormalSteps.DONE");
                 break;
             default:
-                throw new Error("Unexpected change payable point step: " + JSON.stringify(step, null, 2));
+                throw new Error("Unexpected add shop step: " + JSON.stringify(step, null, 2));
         }
     }
 }

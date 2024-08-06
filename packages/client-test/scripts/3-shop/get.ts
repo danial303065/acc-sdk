@@ -6,6 +6,9 @@ const beautify = require("beautify");
 
 async function main() {
     const shopInfo = Helper.loadShopInfo();
+    console.log(`shopId: ${shopInfo.shopId}`);
+    console.log(`wallet.address: ${shopInfo.wallet.address}`);
+
     const contextParams = ContextBuilder.buildContextParams(Helper.NETWORK, shopInfo.wallet.privateKey);
     if (Helper.RELAY_ENDPOINT !== "") contextParams.relayEndpoint = Helper.RELAY_ENDPOINT;
     if (Helper.WEB3_ENDPOINT !== "") contextParams.web3Provider = Helper.WEB3_ENDPOINT;
