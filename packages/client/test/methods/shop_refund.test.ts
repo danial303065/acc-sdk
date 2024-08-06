@@ -214,8 +214,14 @@ describe("Shop Withdrawal", () => {
                 shopId: shopData[purchase.shopIndex].shopId,
                 account: userAccount,
                 phone: phoneHash,
-                sender: await accounts[AccountIndex.FOUNDATION].getAddress()
+                sender: await accounts[AccountIndex.FOUNDATION].getAddress(),
+                signature: ""
             };
+            purchaseParams.signature = await ContractUtils.getPurchaseSignature(
+                accounts[AccountIndex.FOUNDATION],
+                purchaseParams,
+                NodeInfo.getChainId()
+            );
             const purchaseMessage = ContractUtils.getPurchasesMessage(0, [purchaseParams], NodeInfo.getChainId());
             const signatures = await Promise.all(
                 validatorWallets.map((m) => ContractUtils.signMessage(m, purchaseMessage))
