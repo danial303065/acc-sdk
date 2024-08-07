@@ -7,11 +7,11 @@ async function main() {
     let shopId = "";
 
     if (Helper.NETWORK === "acc_mainnet") {
-        ContractUtils.getShopId(wallet.address, LoyaltyNetworkID.ACC_MAINNET);
+        shopId = ContractUtils.getShopId(wallet.address, LoyaltyNetworkID.ACC_MAINNET);
     } else if (Helper.NETWORK === "acc_testnet") {
-        ContractUtils.getShopId(wallet.address, LoyaltyNetworkID.ACC_TESTNET);
+        shopId = ContractUtils.getShopId(wallet.address, LoyaltyNetworkID.ACC_TESTNET);
     } else {
-        ContractUtils.getShopId(wallet.address, LoyaltyNetworkID.ACC_TESTNET);
+        shopId = ContractUtils.getShopId(wallet.address, LoyaltyNetworkID.ACC_TESTNET);
     }
 
     console.log("처리결과입니다.");
