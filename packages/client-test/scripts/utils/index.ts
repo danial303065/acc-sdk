@@ -48,6 +48,16 @@ export class Helper {
         };
     }
 
+    public static loadAssistantInfo(): IUserInfo {
+        const data: {
+            phone: string;
+            privateKey: string;
+        } = JSON.parse(fs.readFileSync("./data/assistant_info.json", "utf8"));
+        return {
+            phone: data.phone,
+            wallet: new Wallet(data.privateKey),
+        };
+    }
     static purchaseId = 0;
     public static getPurchaseId(): string {
         const randomIdx = Math.floor(Math.random() * 1000);

@@ -44,7 +44,8 @@ import {
     WaiteBridgeStepValue,
     WaiteBridgeSteps,
     LedgerAction,
-    IAccountSummary
+    IAccountSummary,
+    RegisterAssistantStepValue
 } from "../../interfaces";
 import {
     AmountMismatchError,
@@ -1658,4 +1659,144 @@ export class LedgerMethods extends ClientCore implements ILedgerMethods {
         return res.data;
     }
     // endregion
+
+    // Provider
+
+    public async isProvider(): Promise<boolean> {
+        const signer = this.web3.getConnectedSigner();
+        if (!signer) {
+            throw new NoSignerError();
+        } else if (!signer.provider) {
+            throw new NoProviderError();
+        }
+        const provider: string = await signer.getAddress();
+        const res = await Network.get(await this.relay.getEndpoint(`/v1/provider/status/${provider}`));
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+
+        return res.data.enable;
+    }
+
+    public async registerProvider(): Promise<void> {
+        const signer = this.web3.getConnectedSigner();
+        if (!signer) {
+            throw new NoSignerError();
+        } else if (!signer.provider) {
+            throw new NoProviderError();
+        }
+
+        const ledgerContract: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), signer);
+        const account: string = await signer.getAddress();
+        const nonce = await ledgerContract.nonceOf(account);
+        const message = ContractUtils.getRegisterProviderMessage(account, nonce, this.web3.getChainId());
+        const signature = await ContractUtils.signMessage(signer, message);
+
+        const param = {
+            provider: account,
+            signature
+        };
+
+        const res = await Network.post(await this.relay.getEndpoint("/v1/provider/register"), param);
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+    }
+
+    public async *registerAssistant(assistant: string): AsyncGenerator<RegisterAssistantStepValue> {
+        const signer = this.web3.getConnectedSigner();
+        if (!signer) {
+            throw new NoSignerError();
+        } else if (!signer.provider) {
+            throw new NoProviderError();
+        }
+
+        const ledgerContract: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), signer);
+        const provider: string = await signer.getAddress();
+        const nonce = await ledgerContract.nonceOf(provider);
+        const message = ContractUtils.getRegisterAssistanceMessage(provider, assistant, nonce, this.web3.getChainId());
+        const signature = await ContractUtils.signMessage(signer, message);
+
+        const param = {
+            provider,
+            assistant: assistant,
+            signature
+        };
+
+        yield {
+            key: NormalSteps.PREPARED,
+            provider,
+            assistant: assistant,
+            signature
+        };
+
+        const res = await Network.post(await this.relay.getEndpoint("/v1/provider/assistant/register"), param);
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+
+        const contractTx = (await signer.provider.getTransaction(res.data.txHash)) as ContractTransaction;
+        yield { key: NormalSteps.SENT, txHash: res.data.txHash, provider, assistant: assistant };
+
+        await contractTx.wait();
+
+        yield { key: NormalSteps.DONE, provider, assistant: assistant };
+    }
+
+    public async *unregisterAssistant(): AsyncGenerator<RegisterAssistantStepValue> {
+        const signer = this.web3.getConnectedSigner();
+        if (!signer) {
+            throw new NoSignerError();
+        } else if (!signer.provider) {
+            throw new NoProviderError();
+        }
+
+        const ledgerContract: Ledger = Ledger__factory.connect(this.web3.getLedgerAddress(), signer);
+        const provider: string = await signer.getAddress();
+        const assistant = AddressZero;
+        const nonce = await ledgerContract.nonceOf(provider);
+        const message = ContractUtils.getRegisterAssistanceMessage(provider, assistant, nonce, this.web3.getChainId());
+        const signature = await ContractUtils.signMessage(signer, message);
+
+        const param = {
+            provider,
+            assistant,
+            signature
+        };
+
+        yield {
+            key: NormalSteps.PREPARED,
+            provider,
+            assistant,
+            signature
+        };
+
+        const res = await Network.post(await this.relay.getEndpoint("/v1/provider/assistant/register"), param);
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+
+        const contractTx = (await signer.provider.getTransaction(res.data.txHash)) as ContractTransaction;
+        yield { key: NormalSteps.SENT, txHash: res.data.txHash, provider, assistant };
+
+        await contractTx.wait();
+
+        yield { key: NormalSteps.DONE, provider, assistant };
+    }
+
+    public async getAssistant(): Promise<string> {
+        const signer = this.web3.getConnectedSigner();
+        if (!signer) {
+            throw new NoSignerError();
+        } else if (!signer.provider) {
+            throw new NoProviderError();
+        }
+        const provider: string = await signer.getAddress();
+        const res = await Network.get(await this.relay.getEndpoint(`/v1/provider/assistant/${provider}`));
+        if (res.code !== 0) {
+            throw new InternalServerError(res?.error?.message ?? "");
+        }
+
+        return res.data.assistant;
+    }
 }

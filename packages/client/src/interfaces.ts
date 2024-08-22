@@ -556,6 +556,20 @@ export type WaiteBridgeStepValue =
           key: WaiteBridgeSteps.TIMEOUT;
       };
 
+export type RegisterAssistantStepValue =
+    | {
+          key: NormalSteps.PREPARED;
+          provider: string;
+          assistant: string;
+          signature: BytesLike;
+      }
+    | { key: NormalSteps.SENT; provider: string; assistant: string; txHash: BytesLike }
+    | {
+          key: NormalSteps.DONE;
+          provider: string;
+          assistant: string;
+      };
+
 export enum LedgerAction {
     NONE = 0,
     SAVED = 1,

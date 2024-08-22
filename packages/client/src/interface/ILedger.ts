@@ -17,7 +17,8 @@ import {
     WithdrawStepValue,
     WithdrawViaBridgeStepValue,
     LedgerAction,
-    IAccountSummary
+    IAccountSummary,
+    RegisterAssistantStepValue
 } from "../interfaces";
 import { BigNumber } from "@ethersproject/bignumber";
 import { BytesLike } from "@ethersproject/bytes";
@@ -112,4 +113,11 @@ export interface ILedgerMethods extends IClientCore {
 
     // History of Side Chain
     getTransferHistoryInSideChain: (account: string, pageNumber?: number, pageSize?: number) => Promise<any>;
+
+    // Provider
+    isProvider: () => Promise<boolean>;
+    registerProvider: () => Promise<void>;
+    registerAssistant: (assistant: string) => AsyncGenerator<RegisterAssistantStepValue>;
+    unregisterAssistant: () => AsyncGenerator<RegisterAssistantStepValue>;
+    getAssistant: () => Promise<string>;
 }

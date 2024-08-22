@@ -591,6 +591,24 @@ export class ContractUtils {
         return signer.signMessage(arrayify(keccak256(encodedData)));
     }
 
+    public static getRegisterProviderMessage(provider: string, nonce: BigNumberish, chainId: BigNumberish): Uint8Array {
+        const encodedResult = defaultAbiCoder.encode(["address", "uint256", "uint256"], [provider, chainId, nonce]);
+        return arrayify(keccak256(encodedResult));
+    }
+
+    public static getRegisterAssistanceMessage(
+        provider: string,
+        assistance: string,
+        nonce: BigNumberish,
+        chainId: BigNumberish
+    ): Uint8Array {
+        const encodedResult = defaultAbiCoder.encode(
+            ["address", "address", "uint256", "uint256"],
+            [provider, assistance, chainId, nonce]
+        );
+        return arrayify(keccak256(encodedResult));
+    }
+
     public static async signMessage(signer: Signer, message: Uint8Array): Promise<string> {
         return signer.signMessage(message);
     }
